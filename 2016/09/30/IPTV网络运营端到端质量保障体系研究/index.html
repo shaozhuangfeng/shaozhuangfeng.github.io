@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="邵壮丰的博客：关于IPTV技术工作的点滴记录，和兴趣的技术分享。专注、关注的技术主要包括IPTV、OTT、CDN、机器学习、模式识别、WEB和移动前端全栈、大数据、网络安全。">
+    <meta name="keywords"  content="邵壮丰,zfshao,xyzszf,邵壮丰博客,Blog,IPTV,OTT,CDN,机器学习,前端,全栈,大数据,网络安全">
+    <meta name="theme-color" content="#000000">
+    
+    <title>IPTV网络运营质量保障体系研究 - 邵壮丰的博客 | zfshao Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2016/09/30/IPTV%E7%BD%91%E7%BB%9C%E8%BF%90%E8%90%A5%E7%AB%AF%E5%88%B0%E7%AB%AF%E8%B4%A8%E9%87%8F%E4%BF%9D%E9%9A%9C%E4%BD%93%E7%B3%BB%E7%A0%94%E7%A9%B6/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!--  change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!--  Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">zfshao</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-green.jpeg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-green.jpeg')
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.3);
+    }
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#IPTV" title="IPTV">IPTV</a>
+                        
+                        <a class="tag" href="/tags/#技术" title="技术">技术</a>
+                        
+                        <a class="tag" href="/tags/#端到端" title="端到端">端到端</a>
+                        
+                        <a class="tag" href="/tags/#质量保障" title="质量保障">质量保障</a>
+                        
+                        <a class="tag" href="/tags/#原创" title="原创">原创</a>
+                        
+                    </div>
+                    <h1>IPTV网络运营质量保障体系研究</h1>
+                    
+                    
+                    <h2 class="subheading">全生命周期保障IPTV质量</h2>
+                    
+                    <span class="meta">Posted by 邵壮丰 on September 30, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				
+<p><code class="highlighter-rouge">摘 要</code></p>
+
+<p>本文从天翼高清（下简称IPTV）业务生命周期的视角，研究IPTV业务受理、安装和使用三个阶段存在的痛点，并为每个阶段设计了相应的保障方案，系统性地提出了IPTV端到端网络运营质量保障体系框架，并在广东电信IPTV实际生产环境中对标此保障体系进行实践，取得了较好成效，为广东近600万用户使用IPTV业务提供了保障。</p>
+
+<p><code class="highlighter-rouge">关键词</code></p>
+
+<p>IPTV 网络运营质量 端到端 质量保障</p>
+
+<h2 id="1-引言">1 引言</h2>
+
+<p>随着三网融合的演进，IPTV业务已成为中国电信继语音、宽带、移动业务之后的又一基础业务。由于IPTV业务涉及头端节目源、CDN平台、承载网络（城域骨干、接入和家庭网络）、终端机顶盒和相关IT支撑系统，是一个复杂的端到端基础业务，如何高质量运营好IPTV业务对电信是一个巨大的挑战。近几年，各大运营商和业界有过一系列对IPTV业务质量保障方面研究，如文献［1］归纳了业务使用过程中在网络侧部署硬探针及用户机顶盒布放软探针，提取软硬探针数据指标的方式监控网络和机顶盒网元质量；文献［2-7］分析和采集影响机顶盒视频播放质量的指标，用于监测IPTV视频播放质量；文献［8］从传输的角度分析影响IPTV视频质量的因素；文献［9］中，华为公司提出视频体验衡量体系评价标准U-VMOS，U-VMOS重点用于测试评价播放过程中的视频质量。前述研究侧重点多集中在售后环节IPTV业务使用过程中，对IPTV终端机顶盒或IP网络运行质量监测进行探索，但鲜有从IPTV业务的到店受理、上门安装和日后业务使用过程进行系统性的质量保障研究。</p>
+
+<p>区别于传统宽带、语音和移动业务等管道性业务，IPTV是一个“云管端”（节目源、平台、管道和终端）全链条形态的业务，我们要规模化发展和运营好IPTV业务，迫切需贯穿售前、售中和售后各环节，端到端地保障IPTV业务质量，因此，本文系统性地提出了一种IPTV端到端网络运营质量保障体系框架，并在实际生产中对标此保障体系持续进行应用实践，取得了一系列成效。</p>
+
+<h2 id="2-iptv业务周期介绍">2 IPTV业务周期介绍</h2>
+
+<p>IPTV业务周期经历了CRM受理、终端安装调测和安装后的使用三个阶段，每个阶段，会涉及电信各个不同的IT支撑系统和平台系统，如图1所示： 
+<img src="/img/IptvE2e/p1.png" alt="p1" />
+图1 IPTV业务周期</p>
+
+<p>受理流程A指在电信业务业务受理入口（如营业厅或网厅等）的客户关系管理（CRM）系统上进行业务受理开通，CRM生成的用户数据流经综合服务开通系统（SPS）同步到3A宽带认证平台用于网络拨号认证，再由3A平台同步给IPTV业务支撑支撑系统（UBSS），最后由UBSS同步到IPTV核心能力平台，实现用户数据在IT支撑系统、宽带认证系统和IPTV平台同步；同时，SPS还同步用户数据到综合调度系统，用于IPTV业务安装调测使用。</p>
+
+<p>安装流程B指IPTV装维人员采用APP终端，将IPTV机顶盒MAC地址通过扫二维码方式录入到综调系统，达到终端设备MAC码和从SPS同步过来的用户开户数据的绑定，再同步给UBSS和IPTV终端管理系统（TMS），这个环节的数据同步，是为IPTV机顶盒在用户家庭安装现场达到机顶盒免配置快装的目的。新机顶盒接入网络时，由机顶盒预配置的拨号账号或提前录入的MAS地址作为拨号账号进行自动PPPoE或IPoE拨号，网络拨号通过后，TMS会根据机顶盒MAC地址比对由前面综调经UBSS同步过来的IPTV网络账号和业务账号信息，把MAC地址所绑定的网络账号和业务账号信息自动下发给机顶盒，这时，机顶盒拥有了所有账号信息，无需人工采用遥控器输入各种信息，很大程度提升了机顶盒现场安装调测效率。</p>
+
+<p>业务使用流程C，指安装完成后，用户在日常使用IPTV时的流程，使用流程包括了网络拨号认证、业务认证和接入IPTV EPG、IPTV视频播放服务。网络认证接入，是机顶盒采用PPPoE或IPoE方式进行网络拨号认证，认证通过后获取承载BRAS或DHCP Server分配的IP地址接入到IPTV网络中；业务认证和接入EPG，是机顶盒使用业务账号发起认证鉴权，认证通过后获取匹配的EPG模版，用户在电视机上就能看到EPG主界面；视频播放服务流程，用户操作EPG界面，播放选中的直播频道或VOD点播节目，若访问的是组播视频则由BRAS或OLT复制组播视频流给用户，若访问单播视频，则IPTV CDN按照调度策略分配合适的流媒体服务器为用户播放单播视频节目，具体流程如图2：
+<img src="/img/IptvE2e/p2.png" alt="p2" />
+图2 IPTV使用流程</p>
+
+<h2 id="3-iptv业务周期各环节的痛点">3 IPTV业务周期各环节的痛点</h2>
+
+<h3 id="31-业务受理">3.1 业务受理</h3>
+
+<p>IPTV业务受理开通环节，涉及IT支撑系统（CRM、SPS）、宽带认证平台（3A）、IPTV能力平台（UBSS和核心平台）等多个系统，在图1的A流程所示，CRM业务受理生成的用户数据需从左到右流转到IPTV核心平台中，这种模式存在若干隐患：其一，平台间是串联的方式，容易造成数据同步延迟大、且环节多中间任一平台或网络出现异常容易导致整个工单流中断或堵单，进而引起前后台系统数据不一致；其二 ，前端平台通常承载综合业务，常需承载大规模业务量，由于系统能力差异，有些生产环境中会采用异步批量同步接口模式，由于缺乏点对点实时反馈机制，也容易导致前后台数据不一致，前后台数据不一致最终会导致IPTV会造成数据混乱和后续计费出账异常；在广东IPTV现网中，此环节发生故障的概率是较高，前后端业务和维护人员吃过不少亏。</p>
+
+<h3 id="32-业务安装">3.2 业务安装</h3>
+<p>传统的IPTV业务安装，通常需要手工使用遥控器输入各种账号密码数据到IPTV机顶盒中，而采用遥控器输入复杂的账号密码数据效率是低下的，因此电信在对机顶盒安装环节正逐步演进到安装现场数据“零配置”，而由终端网管自动下发。在业务安装环节，也存在如下痛点：一是由于3.1所述导致的数据不一致性问题，如数据在UBSS不存在、状态不正确、机顶盒或账号绑定关系不正确、订购产品不符、订购权限未开通等，会导致一线装维人员现场安装失败；二是安装现场给用户演示IPTV业务可能遇到视频播放黑屏、视频卡顿、EPG操作响应慢等问题；引起这些问题的原因可能涉及端管云各个环节，且现场缺乏有效便捷的支撑工具手段，这些问题是当前装维人员的痛点，会影响一线装维效率，同时可能给客户留下负面印象，对IPTV品牌造成影响。</p>
+
+<h3 id="33-业务使用">3.3 业务使用</h3>
+<p>首先，IPTV业务使用过程，可能遇到的问题包括了网络接入失败、业务账号认证鉴权失败、EPG接入失败、EPG操作响应慢、EPG弹出错误代码、IPTV视频播放黑屏、视频播放卡顿、视频出现马赛克、视频播放过程中断报错等，这些故障会直接影响用户的体验体验。引起这些故障的原因有多方面：对网络接入或业务认证鉴权失败的原因，多是账号状态异常或前后台数据不一致，也有可能是由于系统故障导致，需要具体甄别；对于EPG接入失败或EPG操作响应慢或EPG报错，则多是因为机顶盒到EPG网络不通或网络拥塞或EPG服务端性能不足或EPG模版代码逻辑错误导致；对于视频播放黑屏、卡顿、马赛克或播放中断，则多是由于机顶盒到视频服务端网络质量异常，或视频服务端性能不足或头端节目源异常导致；而对引起EPG体验和视频体验劣化的原因，常常和CDN内容分发因素相关。其次，在遇到故障后，用户发起故障申告，时常会遇到运营商修障时间长，故障复发等问题。统计发现在现网中，广东IPTV约有60%以上的故障工单在用户、10000号和预处理专席环节无法处理，需要流转到一线和二线维护处理，这对用户和维护人员都是一个痛点。</p>
+
+<h2 id="4-iptv端到端网络运营质量保障体系">4 IPTV端到端网络运营质量保障体系</h2>
+
+<h3 id="41业务受理保障">4.1业务受理保障</h3>
+
+<p>3.1节的业务受理存在问题揭示了前后台串行模式和接口同步机制存在隐患，给业务开通和后续运营工作带来障碍，需进行优化。我们提出如下优化方案：第一是改造前后台关键接口串行模式为并行模式，即使把“SPS－AAA－UBSS”模式改造为“SPS－AAA”和“SPS－UBSS”并行模式，并把接口同步机制从异步批量改造为实时双向同步机制。新模式提升了数据同步实时性，并减少了因为网络不可达或末端系统故障等原因引起的丢单或卡单现象。第二是需要在数据同步的源头或触发端增加数据稽核功能，即要在SPS增加对同步给AAA、UBSS和综调度的三份数据进行一致性监测、在UBSS增加对同步IPTV核心系统和其他增值系统的数据一致性检测、在综调系统增加同步TMS的数据一致性检测校验，通过制定数据比对规则和任务，周期性触发数据校验，并且在校验发现异常时能触发数据重新覆盖修复，以此降低数据不一致性带来的连锁影响，优化后的架构如图3所示：
+<img src="/img/IptvE2e/p3.png" alt="p3" /> 
+图3 IPTV业务受理接口架构优化图</p>
+
+<h3 id="42业务安装保障">4.2业务安装保障</h3>
+<p>在保障业务安装快速顺利完成，本文给出如下举措：第一，IPTV装维人员在收到系统派发的安装单后在上门前，需发起对用户数据一致性的校验和进行数据拨测，可以在上门安装前先行判断安装单中用户数据和后台数据是否一致，若出现不一致则协调解决后再上门安装，如图4所示，这些功能的实现通常可在掌上APP工具上做开发，通过调用后台各系统的查询接口或认证接口实现。第二，在业务演示时出现体验类质差问题，和日常使用可能遇到的体验类故障相似，具体举措在4.3节统一提出。
+<img src="/img/IptvE2e/p4.png" alt="p4" /> 
+图4 上门安装前数据校验功能图</p>
+
+<h3 id="43业务使用保障">4.3业务使用保障</h3>
+
+<h4 id="431-保障思路和目标">4.3.1 保障思路和目标</h4>
+
+<p>3.3节显示IPTV业务涉及使用过程中可能遇到各种故障，要保障好IPTV业务体验，我们从两个方面进行保障：一是面向平台网络，打造IPTV主动运维监测体系，持续高效监测IPTV端到端系统的运行情况，对发现的异常及时落实相应的整改措施，尽量在用户投诉前解决故障，减少用户报障数量；二是面向用户服务，打造IPTV用户故障快速处理体系，对用户发起的投诉报障，在受障的靠前环节进行快速定界和解决，如图5，目标是力争把60%以上的故障压缩在远程预处理及更前的环节解决，尽量减少一线上门处理，从而缩短故障处理时限，提升客户服务感知，同时也降低运维成本。
+<img src="/img/IptvE2e/p5.png" alt="p5" /> 
+图5 靠前解决用户故障，提升修障效率</p>
+
+<h4 id="432-iptv源云管端主动运维体系">4.3.2 IPTV“源云管端”主动运维体系</h4>
+<p>要保障IPTV业务使用，首先要监测系统运行状况，及时发现系统运行各项KPI指标，并以此为抓手，针对发现的问题采取相应的措施实施优化。要达到这个目标，我们对照IPTV端到端架构，分析IPTV业务体验感知强相关的KPI指标，设计出一套符合实际的KPI监测体系，用于主动监测IPTV系统运行情况和用户的业务体验质量。</p>
+
+<p>如图6所示，IPTV端到端架构由头端节目源（源）、CDN平台（云）、IP承载网络（管）和客户网络及IPTV机顶盒（端）组成，其中节目源是SP注入到运营商CDN的平台；CDN平台主要承担节目内容的分发、EPG和流能力服务和用户产品管理等，CDN常由多级CDN共同构成；承载网络由IP骨干网、城域网入网组成；客户网络及IPTV终端包括了用户家庭网络和IPTV机顶盒，为用户呈现IPTV业务。
+<img src="/img/IptvE2e/p6.png" alt="p6" />
+图6 IPTV端到端网络架构</p>
+
+<p>IPTV系统运行和业务体验质量和“源云管端”息息相关，在整个链条中，任一环节都有可能影响体验质量，因此根据图6的IPTV架构以及图2的IPTV业务使用流程，结合多年的IPTV维护经验，我们分析出IPTV系统侧可能影响IPTV业务质量的主要因素及其关系，并总结出用于刻画和反映系统运行和业务体验感知质量的端到端的主要KPI指标，见表1。
+<img src="/img/IptvE2e/t1.png" alt="t1" />
+表1 刻画IPTV系统运行和业务体验感知质量的主要KPI</p>
+
+<p>我们把表1的KPI指标，投射到IPTV“源云管端”分层模型上，形成了表2的“源云管端”的监测体系：分节目源、CDN平台、承载网络和终端四类监控对象，每类对象按照动态和静态两个纬度，每个纬度又分应用服务、中间件和操作系统三个层面，分别列举出了重要的运行KPI指标，用于衡量IPTV源头、平台和承载网络的系统的运行情况。其中，动态KPI主要是监测系统实时运行的指标，综合这些指标能能监控系统运行质量，是日常保障工作最重要的风向标；静态KPI指标适用于对系统做阶段评估分析使用；并推荐把这些指标接入到运营商的综合网管（通常用于全专业系统监控，适合快速监控通用性KPI指标，对特殊KPI指标定制化能力弱）和专业网管（专用业务监控，适用专业KPI指标定制监控）上进行7*24小时监控，发挥出主动运维能力，及时发现、挖掘和解决问题。
+<img src="/img/IptvE2e/t2.png" alt="t2" />
+表2 IPTV“源云管端”质量监测体系</p>
+
+<h4 id="433-iptv用户故障快速处理体系">4.3.3 IPTV用户故障快速处理体系</h4>
+<p>为快速处理IPTV用户申告的故障，需要有用户业务使用时、特别是故障发生时机顶盒、节目源、CDN和网络的各种和体验质量数据作为故障诊断处理的基础。我们围绕下面两方面来实现这个目标：</p>
+
+<p>第一，规划设计一套IPTV业务体验质量监测系统（SQM）用于采集端到端和体验质量相关的数据，特别是周期性的采集和记录IPTV机顶盒在日常使用过程历史播放行为和体验质量指标数据，形成用户的健康档案，在故障申告随时提供数据支撑能力。我们设计如图7的SQM架构，其中A和B区构成SQM系统，A区是SQM的服务端，B区是SQM探针采集客户端；在B区中，终端探针采集机顶盒播放信息和体验质量数据，直播源监控探针采集组播源播放质量数据，CDN探针采集CDNPOP点网络质量数据，拨测探针采集定制或临时发起的EPG和流媒体播测质量数据。各探针采集到的数据通过B-&gt;A接口送到SQM服务端，结合南向接口收集C区的接入网DTS、城域网网管、ITMS和 UBSS相关数据，在SQM服务端计算分析模块进行数据计算、关联分析和入库，计算结果用于故障定界、体验质量报表、告警模块和交互呈现模块使用为SQM故障处理人员处理故障提供参考，同时为SQM监控人员提供IPTV趋势性和实时性的体验质量监控使用。同时，SQM终端管理TMS模块可用于远程对用户机顶盒发起配置修改和业务拨测；SQM通过北向接口，向D区的客户服务支撑系统提供用户健康档案等数据查询和业务拨测能力开放，支撑IPTV客户服务故障的快速定位和处理。探针采集的数据和南向接口同步的内容见表3。
+<img src="/img/IptvE2e/p7.png" alt="p7" /> 
+图7 IPTV SQM架构图
+<img src="/img/IptvE2e/t3.png" alt="t3" />
+表3 探针采集数据和南向接口同步数据内容</p>
+
+<p>第二，针对运营商客户服务流程，我们设计基于用户机顶盒和EPG的自助服务系统用于引导用户进行故障自检，以及规划设计10000号客服系统、故障预处理支撑系统、一线装维APP和二线维护系统调用SQM开放接口的能力，用于获取用户健康档案等数据和触发机顶盒故障定界，以支撑维护人员快速处理用户故障，形成贯穿IPTV客户服务各环节的故障处理支撑体系。表4是各支撑系统对用户故障处理支撑能力以及SQM开放接口提供的能力，图8和图9是在机顶盒上进行故障自助服务的原型，图10是SQM故障定界原型，可能外部系统调用。
+<img src="/img/IptvE2e/t4.png" alt="t4" />
+表4 SQM开放接口获取的数据
+<img src="/img/IptvE2e/p8.png" alt="p8" />    <br />
+图8 机顶盒自助服务：一键检测   <br />
+<img src="/img/IptvE2e/p9.png" alt="p9" />
+图9 机顶盒自助服务：在线反馈故障
+<img src="/img/IptvE2e/p10.png" alt="p10" /> 
+图10 SQM故障定界样例</p>
+
+<h2 id="5总结">5总结</h2>
+
+<p>本文分析了IPTV业务周期三个阶段面临的痛点，针对每一阶段，分别设计了对应的保障方案：在业务受理方面，我们规划了支撑系统架构优化的方案；在业务安装保障方面，我们规划了终端安装前的数据校验和拨测方案；在业务使用保障方面，我们分析设计了“源云管端”主动运维体系和用户故障快速处理体系。我们正对标上述保障体系，在广东电信IPTV现网开展相应实践应用，取得了阶段性的成效。特别在业务使用保障方面，对“云”端，规划建设了IPTV专业网管重点对全网CDN设备进行业务服务层和中间件服务统一监控，包括采用全网CDN出局流量、CDN内容分发、业务服务调度等25类KPI指标；使用电信统一综合网管监控CDN 设备6项通用操作系统级指标；在“管”，纳入城域网统一网管监控；在“源”和“端”方面，规划了SQM系统综合监测全网将近500个直播频道和500多万机顶盒业务质量趋势；基本上从“源云管端”形成了一个较完整的保障框架，这些工具手段有效支撑了全网5000台服务器日常主动运维工作，也为广东近600万用户使用IPTV业务提供了有效保障。未来，我们将围绕提升IPTV用户体验感知这一中心，不断迭代完善IPTV端到端保障体系，并在整个业务生命周期进行实践检验。</p>
+
+<h2 id="参考文献">参考文献</h2>
+<ol>
+  <li>陈涛；IPTV 端到端业务质量监测系统的技术探索［D］；邮电设计技术；201605</li>
+  <li>邵壮丰等；广东IPTV业务服务质量提升研究［j］；电信科学；2012</li>
+  <li>熊雄；基于电信IPTV的服务质量监测与实现［j］；计算机工程；2014年05期</li>
+  <li>沈爱华；IPTV 终端服务质量监控策略及改进技术研究［j］；通信技术；201604</li>
+  <li>范少芬;基于网络损伤和流媒体特征的IPTV视频QoE评估方法的研究和应用[D];华东师范大学;2011</li>
+  <li>陈玉花;张治中;杜西亚;IPTV测试仪测试指标提取方案研究[J];电视技术;2009年02期</li>
+  <li>李颖姝;IPTV服务视频质量客观评估方法的研究[D];武汉理工大学;2009</li>
+  <li>张桂卿；IPTV视频传输质量问题分析［j］；广播与电视技术；2014年41卷</li>
+  <li>华为U-VMOS；http://developer.huawei.com/cn/ict/Products/TelecoSoftware/VideoExperienceCapbility/U-vMOS/SDK；201601</li>
+</ol>
+
+
+                <hr style="visibility: hidden;">
+
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/12/23/IPTV%E5%B9%B3%E5%8F%B0%E6%89%BF%E8%BD%BDOTT%E4%B8%9A%E5%8A%A1%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6/" data-toggle="tooltip" data-placement="top" title=" IPTV平台承载OTT业务的关键技术研究">
+                        Previous<br>
+                        <span> IPTV平台承载OTT业务的关键技术研究</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/11/20/%E5%B9%BF%E4%B8%9CIPTV%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E5%8F%8A%E4%B8%8B%E4%B8%80%E9%98%B6%E6%AE%B5%E6%96%B9%E5%90%91/" data-toggle="tooltip" data-placement="top" title="广东IPTV技术发展历程及下一阶段方向">
+                        Next<br>
+                        <span>广东IPTV技术发展历程及下一阶段方向</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#IPTV" title="IPTV" rel="7">
+                                    IPTV
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#技术" title="技术" rel="3">
+                                    技术
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#原创" title="原创" rel="7">
+                                    原创
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#技术发展" title="技术发展" rel="4">
+                                    技术发展
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://shaozhuangfeng.github.io">Is Me</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/shaozhuangfeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; zfshao 2017
+                    <br>
+                    
+<!--                    Theme by <a href="http://zfshao.me">邵壮丰 Zfshao</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=xyzszf&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+-->                    
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'zfshao.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
