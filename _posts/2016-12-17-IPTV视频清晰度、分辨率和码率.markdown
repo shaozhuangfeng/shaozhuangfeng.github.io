@@ -1,0 +1,28 @@
+---
+layout:     post
+title:      "IPTV清晰度、分辨率和码率"
+subtitle:   "IPTV视觉的盛宴"
+date:       2016-12-17
+author:     "zfshao"
+header-img: "img/post-bg-IptvResolution.png"
+header-mask: 0.3
+catalog:    true
+tags:
+    - IPTV
+    - 技术发展
+    - 原创
+---
+
+### 广东IPTV视频清晰度、分辨率和码率关系
+
+高清晰度、超高清晰度当然是视频演进的方向，当然对带宽需求也是越高。
+
+
+清晰度 |        分辨率                    |  码率
+------|----------------------------------|-------
+标清   | 720x480                          | 2.5M
+高清   | 1024x720P；1920x1080i；1920x1080p|  8M
+超清   |                                  | 16M
+4K    |3840x2160                         | 20M
+8K    |7680x4320                         |
+
