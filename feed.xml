@@ -1,30 +1,785 @@
----
-layout: null
----
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>{{ site.title | xml_escape }}</title>
-    <description>{{ site.description | xml_escape }}</description>
-    <link>{{ site.url }}{{ site.baseurl }}/</link>
-    <atom:link href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" rel="self" type="application/rss+xml" />
-    <pubDate>{{ site.time | date_to_rfc822 }}</pubDate>
-    <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
-    <generator>Jekyll v{{ jekyll.version }}</generator>
-    {% for post in site.posts limit:10 %}
+    <title>zfshao</title>
+    <description>邵壮丰的博客：关于IPTV技术工作的点滴记录，和兴趣的技术分享。专注、关注的技术主要包括IPTV、OTT、CDN、机器学习、模式识别、WEB和移动前端全栈、大数据、网络安全。</description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Wed, 25 Jan 2017 16:40:24 +0800</pubDate>
+    <lastBuildDate>Wed, 25 Jan 2017 16:40:24 +0800</lastBuildDate>
+    <generator>Jekyll v3.3.1</generator>
+    
       <item>
-        <title>{{ post.title | xml_escape }}</title>
-        <description>{{ post.content | xml_escape }}</description>
-        <pubDate>{{ post.date | date_to_rfc822 }}</pubDate>
-        <link>{{ post.url | prepend: site.baseurl | prepend: site.url }}</link>
-        <guid isPermaLink="true">{{ post.url | prepend: site.baseurl | prepend: site.url }}</guid>
-        {% for tag in post.tags %}
-        <category>{{ tag | xml_escape }}</category>
-        {% endfor %}
-        {% for cat in post.categories %}
-        <category>{{ cat | xml_escape }}</category>
-        {% endfor %}
+        <title>[原创]IPTV常见故障处理指引</title>
+        <description>&lt;p&gt;&lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;这个专题，我把IPTV运维工作相关的方法、工具、培训材料以Wiki方式归纳统一呈现，方便童鞋们学习参考。同时，如果你有什么好的资料希望共享，请发给我；如果你对这个Wiki建设有什么好的想法，请告诉我；如果你特别希望在Wiki中增加什么内容，也可告诉我。联系方式：OA邮箱&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;注：下面可能部分资料阅读需要解压密码，请咨询市公司IPTV维护同事&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;1iptv故障处理思路&quot;&gt;1.IPTV故障处理思路&lt;/h3&gt;
+
+&lt;p&gt;IPTV业务，从头到脚基本上电信运营商提供服务，除了SP提供的节目源之外，从顶级CDN、区域CDN和边缘CDN、管理平台、骨干网络、城域网网络、接入网络、猫和机顶盒，是运营商各种业务中涉及流程最长环节最多的业务。客观的说，IPTV业务的复杂度远超过4G、宽带等基础业务，这也直接决定了IPTV的故障处理难度相对其他业务更加复杂、处理难度更大，对维护人员知识技能要求更高，很多维护人员很害怕处理IPTV故障。但不管IPTV故障处理难度多大，归纳起来故障现象和可能愿意无非是如下8类：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;序&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;故障现象&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;可能原因&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;开机接入不了&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;（1）数据：用户账号数据在后台系统不一致，个别故障居多 &lt;br /&gt;（2）网络：网络不通，机顶盒无非认证，个别或局部故障 &lt;br /&gt;（3）平台：IPTV系统故障，特别是会引起大规模同类故障 &lt;br /&gt;（4）机顶盒：机顶盒版本BUG，多在升级后出现，可能会集中于某种型号机顶盒&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;视频播放卡顿、马赛克&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;（1）外部网络：视频数据丢包，可能是承载网络拥塞、链路误码、网络设备故障、网络设备数据配置不合理导致，局部故障，此类原因居多 &lt;br /&gt;（2）家庭网络：内部线路、路由器问题，个案 &lt;br /&gt;（3）平台：CDN流媒体服务器负载过重，或设备故障，局部故障 &lt;br /&gt;（4）节目源：SP提供的节目源有问题，大面积有相同故障 &lt;br /&gt;（5）速率：账号速率不达标，个案 &lt;br /&gt;（6）机顶盒：机顶盒版本BUG，多在升级后出现，可能会集中于某种型号机顶盒&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;3&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;视频播放黑屏&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;（1）网络：路由不通，或严重丢包，居多；有时提示10088等错误代码提示 &lt;br /&gt;（2）平台：CDN设备容量完全满了，无非提供服务，概率较少；有时提示RTSP404代码&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;4&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;视频播放过程提示错误代码&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;同2，丢包严重时会抛出错误代码，如果EPG模版有对错误代码进行提示，则会有错误代码提示，若无提示，则现象也同2和3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;5&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;EPG操作响应慢&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;（1）机顶盒：老旧低配置机顶盒居多，机顶盒性能不够满足不了EPG页面的渲染计算和内存需求，特别是早起的普通标清、高清机顶盒，需要更换为性能更高的4K智能机顶盒 &lt;br /&gt;（2）平台：EPG模版逻辑异常或加载的其他资源无非正常加载；或EPG服务器符合性能不足&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;6&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;EPG提示错误代码&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;（1）参考&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvErrorcode2.0.xlsx&quot;&gt;《广东IPTV错误代码V2.0》&lt;/a&gt;&lt;br /&gt;（2）主要错误代码：HTTP 500，EPG模版或EPG容器问题故障；10071，机顶盒访问EPG页面响应超时，可能是路由不通或者EPG服务器故障无响应&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;7&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;机顶盒/遥控器其他问题&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;（1）机顶盒：机顶盒软件或硬件故障，个案 &lt;br /&gt;（2）遥控器控制不了：电气干扰等&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;8&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;费用争议&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;（1）IPTV上的增值付费节目较多，可能家庭中其他人购买了增值服务业务但缴费人不知，可通过查询日志记录确认 &lt;br /&gt;（2）话单生成系统、计费系统故障导致出账异常&lt;br /&gt;（3）其他恶意订购&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;每类问题的故障原因可能多种多样，相同的症状可能是由不同的病因引起，需要对症下药，但处理的思路不外乎：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;对比拨测&lt;/code&gt;：问问隔壁老王家的IPTV是否正常，看看不同OLT/BAS/BR下的用户是否正常&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;逐段排查&lt;/code&gt;：参照上表，查数据、查网络、查平台、查终端、查电视台节目源，顺藤摸瓜查；故障处理过程可能有一点小难度，实在搞不定的，可下载&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvTroubleshoot.rar&quot;&gt;《IPTV故障处理指引》&lt;/a&gt; 参考，多处理几单你就是高手了（只会报障不会处理是不行的^_^）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;2iptv故障处理指引&quot;&gt;2.IPTV故障处理指引&lt;/h3&gt;
+
+&lt;p&gt;作为IPTV维护专家，不管哪一类故障，我们总是需要有办法来解决故障，让用户放心地使用我们IPTV业务。下面IPTV故障处理的指引，值得仔细一读，结合实践不断提升自己的IPTV故障处理技能：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvTroubleshoot.rar&quot;&gt;《IPTV故障处理指引》&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvErrorcode2.0.xlsx&quot;&gt;《广东IPTV错误代码V2.0》&lt;/a&gt;，可查询常见错误代码及其可能原因和处理建议。&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvMac.png&quot;&gt;《IPTV机顶盒MAC地址对应表》&lt;/a&gt;，可查询IPTV机顶盒与MAC地址对应关系，在处理故障时帮助判断机顶盒属于哪个厂家的。&lt;/li&gt;
+  &lt;li&gt;同时建议你关注&lt;code class=&quot;highlighter-rouge&quot;&gt;广东IPTV自助服务&lt;/code&gt;微信公众号：&lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;gdiptvss&lt;/code&gt;&lt;/strong&gt;，可更便捷查询一些常见故障处理指引。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;3iptv故障案例&quot;&gt;3.IPTV故障案例&lt;/h3&gt;
+&lt;p&gt;省市分享的一些故障案例，值得参考学习。同时特别感谢分享这些故障案例的童鞋们，在案例中我们也保留的原作者的姓名。我们提倡分享精神，如果你有好的经验案例，请发给我们放到Wiki上。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvCase@2015.rar&quot;&gt;2015年IPTV故障案例&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvCase@2016.rar&quot;&gt;2016年IPTV故障案例&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;4iptv其他培训参考资料&quot;&gt;4.IPTV其他培训、参考资料&lt;/h3&gt;
+
+&lt;p&gt;更多IPTV（也称天翼高清）培训材料，可参考广东电信&lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;知识云&lt;/code&gt;&lt;/strong&gt;（由于是DCN地址，这里就不给链接了），搜索&lt;code class=&quot;highlighter-rouge&quot;&gt;天翼高清&lt;/code&gt;或&lt;code class=&quot;highlighter-rouge&quot;&gt;IPTV&lt;/code&gt;或&lt;code class=&quot;highlighter-rouge&quot;&gt;邵壮丰&lt;/code&gt;关键字。&lt;/p&gt;
+
+&lt;h3 id=&quot;5-iptv运维工具&quot;&gt;5. IPTV运维工具&lt;/h3&gt;
+
+&lt;p&gt;IPTV涉及端管云多环节，不同维护场景有不同的维护工具系统，因此本节会把IPTV日常运行维护工作涉及的工具系统做一个小结介绍：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;序号&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;工具名称&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;主要功能&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;使用对象&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;使用场景&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;获取途径&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;掌上综调（APP）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;查询IPTV用户数据、机顶盒解绑、密码重置等&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;一线装维人员&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;IPTV机顶盒装维&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;分公司综调&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;光宽端到端系统（APP、PC）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;光宽带、IPTV机顶盒视频播放卡顿马赛克等故障时进行诊断，这里嗮一张&lt;a href=&quot;/img/IptvTroubleshoot/1/3.jpg&quot;&gt;IPTV故障诊断例&lt;/a&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;一线装维、二次处理、客服人员&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;IPTV机顶盒故障处理&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;分公司综、客调&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;3&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;局域网内机顶盒维护小工具STBmonitor（在PC上使用）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;用于局域网内或网络可达范围内连接机顶盒，对机顶盒进行配置、日志采集抓包&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;一线装维资深技术专家、二线维护支撑人员&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;IPTV机顶盒疑难故障处理&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;省NOC&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;4&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;IPTV质量监测系统SQM（在PC上使用）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;监测机顶盒播放质量数据，提供机顶盒视频播放记录数据的查询管理（光宽系统已调用SQM系统重要数据）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;二线维护支撑人员&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;IPTV播放质量差诊断、IPTV运行质量监控&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;省NOC&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;4&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;IPTV其他专业网管&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;对IPTV管理平台和全网CDN节点运行的运行管理、监控&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;二线维护支撑人员&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;IPTV运维监控&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;省NOC&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;6其他&quot;&gt;6.其他&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;想测试一下你的IPTV技术知识么？这里有一份原创性试卷&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvTest.pdf&quot;&gt;《广东天翼高清专家人才考试试卷》&lt;/a&gt;，值得尝试一下。&lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+        <pubDate>Sun, 01 Jan 2017 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2017/01/01/IPTV%E5%B8%B8%E8%A7%81%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%BC%95/</link>
+        <guid isPermaLink="true">http://localhost:4000/2017/01/01/IPTV%E5%B8%B8%E8%A7%81%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%BC%95/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术发展</category>
+        
+        <category>原创</category>
+        
+        
       </item>
-    {% endfor %}
+    
+      <item>
+        <title>IPTV清晰度、分辨率和码率</title>
+        <description>&lt;h3 id=&quot;广东iptv视频清晰度分辨率和码率关系&quot;&gt;广东IPTV视频清晰度、分辨率和码率关系&lt;/h3&gt;
+
+&lt;p&gt;高清晰度、超高清晰度当然是视频演进的方向，当然对带宽需求也是越高。&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;清晰度&lt;/th&gt;
+      &lt;th&gt;分辨率&lt;/th&gt;
+      &lt;th&gt;码率&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;标清&lt;/td&gt;
+      &lt;td&gt;720x480&lt;/td&gt;
+      &lt;td&gt;2.5M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;高清&lt;/td&gt;
+      &lt;td&gt;1024x720P；1920x1080i；1920x1080p&lt;/td&gt;
+      &lt;td&gt;8M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;超清&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;16M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;4K&lt;/td&gt;
+      &lt;td&gt;3840x2160&lt;/td&gt;
+      &lt;td&gt;20M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;8K&lt;/td&gt;
+      &lt;td&gt;7680x4320&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+</description>
+        <pubDate>Sat, 17 Dec 2016 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2016/12/17/IPTV%E8%A7%86%E9%A2%91%E6%B8%85%E6%99%B0%E5%BA%A6-%E5%88%86%E8%BE%A8%E7%8E%87%E5%92%8C%E7%A0%81%E7%8E%87/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/12/17/IPTV%E8%A7%86%E9%A2%91%E6%B8%85%E6%99%B0%E5%BA%A6-%E5%88%86%E8%BE%A8%E7%8E%87%E5%92%8C%E7%A0%81%E7%8E%87/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术发展</category>
+        
+        <category>原创</category>
+        
+        
+      </item>
+    
+      <item>
+        <title> IPTV平台承载OTT业务的关键技术研究</title>
+        <description>&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;摘要&lt;/code&gt;：&lt;/p&gt;
+
+&lt;p&gt;本文分析OTT的业务开放性和网络无关性特征，提出终端接入和CDN部署适应网络无关性的技术方法，并提出采用CDN智能调度优化技术、ABR和VBR适应性码率、以及视频播放防盗链技术来解决IPTV平台升级为开放性和网络无关性平台可能面临的难题，为IPTV平台平滑升级为同时承载OTT与IPTV业务的融合富媒体平台提供了技术参考，避免为发展OTT业务需重新建设独立OTT平台进行重复投资。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;关键词&lt;/code&gt;:  OTT  IPTV  关键技术 智能调度 防盗链 适应性码率&lt;/p&gt;
+
+&lt;h3 id=&quot;1--引言&quot;&gt;1  引言&lt;/h3&gt;
+
+&lt;p&gt;IPTV业务是电信运营商最重要的固网增值业务，近两年，OTT业务的快速发展，给IPTV业务发展带来了严峻的挑战，2013年国内OTT用户规模达到500万，年环比增长超过100%。国内电信运营商IPTV用户规模为2500万，年增长为25%，增长率落后于OTT，行业发展趋势和竞争压力，倒逼着运营商在推进IPTV业务的同时也发展OTT业务。&lt;/p&gt;
+
+&lt;p&gt;运营商要发展OTT业务，面临着是完全新建OTT平台还是在现有的IPTV平台上进行升级改造为兼容承载OTT业务的融合平台的抉择。业界多从宏观上和运营层面对OTT的发展趋势及其对IPTV的影响进行讨论，但鲜有从技术上研究IPTV如何向OTT平滑演进的研究。本文从技术上，研究了OTT业务的开放性和网络无关性特征主要特征，提出了对终端机顶盒网络接入改造、升级CDN节点网络部署模式、优化CDN智能调度机制、实施自适应码率技术和部署视频播放防盗链技术五项关键技术及实现方法，用于实现运营商IPTV平台直接平滑升级为同时承载OTT与IPTV业务的融合富媒体平台，避免为发展OTT业务需重新建设独立OTT平台进行重复投资和缩短了OTT平台的建设周期。&lt;/p&gt;
+
+&lt;h3 id=&quot;2--ott的开放性和网络无关性&quot;&gt;2  OTT的开放性和网络无关性&lt;/h3&gt;
+
+&lt;p&gt;OTT业务是基于开放互联网的各种视频及数据服务业务，强调服务与物理网络的无关性，开放性与网络无关性特征显著。&lt;/p&gt;
+
+&lt;p&gt;在终端网络接入方面，OTT业务承载在普通互联网上。用户家庭安装了宽带网络，OTT机顶盒直接通过家庭路由器DHCP接入互联网，OTT业务与PC、智能手机、pad等终端共享带宽，普通宽带上网一致，开放性极强。而对于运营商的IPTV业务，为保障视频体验质量，运营商多为IPTV业务配置独立的IPTV网络接入域，IPTV机顶盒采用PPPOE拨号或IPOE的方式接入，机顶盒获取的IP地址属于IPTV域专网或私网地址，机顶盒网络访问受限，终端处于封闭的网络。&lt;/p&gt;
+
+&lt;p&gt;在CDN平台部署方面，国内OTT运营商，如乐视、CNTV等，其CDN节点基本覆盖了国内各省，且部署在电信、联调和移动等电信运营商网内IDC，让用户优先接入本运营商网内的OTT CDN节点进行视频服务，实现了OTT真正意义上的全网覆盖，用户接入使用OTT业务体验无差异。而对电信运营商IPTV平台，其网络架构和OTT有很大的差异，如各省的IPTV CDN平台基本都是部署在省内IPTV域内的专网平台，是一个封闭的系统。&lt;/p&gt;
+
+&lt;p&gt;从封闭的网络走进开放的网络，让封闭的系统要走向开放，是发展OTT业务的基本要求。但打破专网和封闭系统限制，将不可避免面临一系列问题，特别是服务质量和网络安全问题，例如IPTV既有的调度机制无法支撑开放性服务请求引起CDN节点的过载，和缺乏多码率服务机制导致视频服务质量下降的可能，同时开放的网络和平台将带来视频盗播可能性。因此要实现IPTV升级改造为能兼容承载OTT业务，需要解决前述问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;3--终端接入和cdn部署网络无关性技术实现&quot;&gt;3  终端接入和CDN部署网络无关性技术实现&lt;/h3&gt;
+
+&lt;h4 id=&quot;31-终端接入网络无关性实现&quot;&gt;3.1 终端接入网络无关性实现&lt;/h4&gt;
+
+&lt;p&gt;在IPTV业务采用了专网接入，运营商在受理IPTV业务时，通过CRM系统生成IPTV“帐号对”（网络帐号、业务帐号），其中网络帐号实现网络的PPPOE拨号接入专网，业务帐号用于IPTV业务认证鉴权。而对于OTT业务，可直接利用家庭互联网路由网关设备，通过DHCP实现机顶盒接入到普通互联网，因此在终端网络接入方面，可选择保留原有的CRM业务开通流程，也可简化进一步CRM业务开通流程，如把原来“帐号对”升级为唯一一个OTT业务帐号，终端通过DHCP接入开放的互联网，实现终端无障碍访问各种视频和数据资源。&lt;/p&gt;
+
+&lt;p&gt;OTT业务具备多、快、新的特点，即业务需求多、业务更新变化快速、创新性强，常有颠覆性和推倒重来的业务运营需求。就业务的开通而言，经验表明，对传统电信运营商既有的营业厅CRM业务受理模式就是一个很大的挑战，这是因为从CRM到IPTV或OTT平台，业务受理数据流需要跨多个IT支撑系统，任何一个环节出异常，会导致工单流异常退出，尤其对IT系统有新增功能需求，涉及多个系统接口的同步开发，实现难度大周期长，直接利用现有的IT支撑系统来发展OTT业务，必将遇到很多困难和错失系列机遇。因此急需用富有远见的眼光从顶层设计优化OTT业务受理流程和入口，从原有冗长多环节的CRM受理流程中相对独立或开辟新的业务受理通道，实现流程的扁平化以提升效率。&lt;/p&gt;
+
+&lt;h4 id=&quot;32-cdn平台部署网络无关性实现&quot;&gt;3.2 CDN平台部署网络无关性实现&lt;/h4&gt;
+
+&lt;p&gt;IPTV CDN通常部署在相对封闭性的网络下，要实现向OTT转型，需要打破原有封闭网络。在具体技术实现上，对部署在私网网络下的CDN节点，需在节点出口层对服务器IP地址作转换或进行私网IP地址割接，把私网IP地址改造为互联网公网IP地址，才能让终端路由可达。对于部署在互联网公网下的CDN节点，通常在节点出口层有配置严格的访问控制策略。而放宽访问控制的同时，可同步对服务端最小化应用服务及端口的基线配置，减少服务端不必要应用服务暴露在互联网而带来潜在不可测的风险；并在CDN节点采集各种日志流量数据、建设配套的安全管控体系，严格落实安全作业计划，定期开展相关安全审计工作，挖掘解决潜在的安全隐患，实现平台部署网络无关性。&lt;/p&gt;
+
+&lt;h3 id=&quot;4--ott服务质量保障技术&quot;&gt;4  OTT服务质量保障技术&lt;/h3&gt;
+
+&lt;p&gt;开放专网和封闭系统面临系列问题，如IPTV既有的调度机制无法支撑开放性服务请求引起CDN节点的过载，和缺乏多码率服务机制导致视频服务质量下降的可能【1，2】，同时开放的网络和平台将带来视频盗播可能性，本节提出了CDN智能调度优化技术、ABR和VBR适应性码率，以及视频播放防盗链技术，用于解决IPTV平台升级为开放性和网络无关性平台可能面临的难题【3，7】。&lt;/p&gt;
+
+&lt;h4 id=&quot;41-cdn智能调度机制优化&quot;&gt;4.1 CDN智能调度机制优化&lt;/h4&gt;
+
+&lt;p&gt;OTT最重要的业务是视频，视频观看的流畅性决定了用户的粘度。由于历史原因和竞争关系，国内三大电信运营商的基础宽带网络互通性和互联带宽不足是客观事实，因此部署在不同运营商下的CDN平台，即使平台侧服务能力足够，但在跨网跨域的服务过程中仍存在带宽不足的瓶颈，无法保障同源视频服务质量一致性，为保障视频服务质量，需通过合理的负载均衡调度机制进行保障。&lt;/p&gt;
+
+&lt;p&gt;业界对负载均衡调度，业界常用DNS多子域轮询负载均衡技术【4】，对于运营商IPTV平台，在CDN调度方面，其核心思路也是采用负载均衡的调度模式，但在具体的实现模式上和OTT有差异，例如，C省的IPTV平台调度采用IP预配调度和三元组负载均衡自动调度模型。模型中有F函数和G函数，F函数描述了机顶盒接入时，CDN调度系统根据预配置好的IP调度策略，把机顶盒首先调度到预配置的CDN（i）节点，采用F函数是由于IPTV机顶盒获取的专网/私网IP地址具有连续性，IP预配置的调度机制实现容易和有效，在本省内使用通用DNS域名解析而无需而外部署DNS子域来实现轮询均衡调度。模型中G函数描述了机顶盒调度到一个CND（i）节点后，在节点内部对流媒体服务器的寻址调度，调度过程是一个四元组合模式，即依据节点内服务器是否有请求的节目内容、服务器的健康度（如CPU、内存是否超限或磁盘是否故障）、本台服务器并发用户数是否超License和选择负载（如流量）最轻的服务器为用户提供视频服务，F和G函数分别实现了节点级和节点内部的寻址调度过程。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/img/IptvCdn/p1.png&quot; alt=&quot;p1&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;对于OTT业务，则上述的IPTVCDN调度模式存在两大局限，一方面，OTT终端接入采用了公网IP地址，地址不连续且跨网跨域，IP地址无法作为先验信息提前进行预配置，容易出现CDN节点与节点之间并发负载不均的现象进而导致整节点服务质量下降的可能；另一方面，对单个CND节点内部，由于混合高低码率的节目和IP预配置机制带来的不可测的业务突增造成CDN节点出口带宽拥塞，可能导致节点服务质量下降。
+基于上述分析，为实现IPTV平台升级改造为OTT业务，对IPTV的CDN调度策略需进行相应的升级。本文提出了一种基于IPTV CDN的优化调度策略机制，引入了CDN节点调度策略归并机制、增加CDN节点出口带宽负载和节点视频服务质量的多维调度机制，提升了CDN节点的服务质量可靠性和简化了IP预配置，具体模型如下：
+&lt;img src=&quot;/img/IptvCdn/p2.png&quot; alt=&quot;p2&quot; /&gt;
+F’函数引入了CDN节点调度策略归并机制、CDN节点级的负载和节点级质量调度机制。&lt;/p&gt;
+
+&lt;p&gt;CDN节点调度策略归并机制：由于IPTV平台节点数量多，互联网不连续无序的IP请求难以合理均衡预配置到CDN节点，因此，我们引入了CDN节点调度策略归并机制，把原细颗粒度N个CDN节点 ，在逻辑上进行拓扑归并，根据实际情况归并为P个，P&amp;lt;=N。在实际操作上，可把互联网IP按大范围段连续切割为P份，预配置到规约后的P个节点，可结合承载网的分布，如省内多个分公司城域网组成一个大城域网，一般数量P的设置可等同于大城域网的数量。&lt;/p&gt;
+
+&lt;p&gt;CDN节点级的负载和节点级质量调度：引入节点级负载和节点级服务质量两个调度变量，实现系统先对归并后的预配置的CDN节点总负载和节点服务质量进行识别，若负载或服务质量超过合理阀值，则F’函数进行递归重新计算直到选择更合适的CDN节点，再进入G函数进行节点内部的服务器寻址调度。&lt;/p&gt;
+
+&lt;h4 id=&quot;42-abr和vbr适应性码率&quot;&gt;4.2 ABR和VBR适应性码率&lt;/h4&gt;
+
+&lt;p&gt;OTT业务为保障不同网络环境下视频播放质量，对相同节目在播放期间支持多码率自动切换选择最合适的码率播出【5】，即自适应码率（ABR），原理见图1。而现有的IPTV业务，基本采用了恒定码率（CBR）播出机制，无法适应播放期间随网络质量的变化而切换合适码率播出，因此需IPTV的升级改造，需要实现从CBR过渡到ABR。
+&lt;img src=&quot;/img/IptvCdn/p3.png&quot; alt=&quot;p3&quot; /&gt; 
+ABR实现原理&lt;/p&gt;
+
+&lt;p&gt;实现CBR升级到ABR，涉及节目内容提供商提供多码率的节目源，升级内容管理系统（CMS）以实现多码率节目通过接口从SP资源系统下发到IPTV CDN平台；同时，还需升级IPTV EPG，实现EPG携带多码率URL或索引，且终端机顶盒需升级具备对视频播放过程缓存水位或播放质量的识别，在播控开始阶段，选择低码率分片，可实现低时延播放并评估可用带宽逐渐获取高码率分片；在出现网络拥塞时，终端切换到小码率文件播放，在缓冲溢出时，暂停请求，在网络质量允许下，切回高码率分片，实现播放流畅和清晰的折中选择。&lt;/p&gt;
+
+&lt;p&gt;在实际升级操作中，由于升级改造往往难以一步到位，因此可采用可变码率（VBR）的中间路线，即是在头端CRM携带用户带宽速率信息同步到IPTV平台，IPTV平台根据用户带宽数据先系统选择一种合适的码率分片播放，用户也可在EPG上手动变更更高或更低清晰度的码率参数，实现半自适应性码率选择，再逐步过渡到ABR，以快速支撑业务发展需要。&lt;/p&gt;
+
+&lt;h4 id=&quot;43-ott视频播放防盗链&quot;&gt;4.3 OTT视频播放防盗链&lt;/h4&gt;
+
+&lt;p&gt;IPTV和OTT的视频内容储存和节目URL发布是相对独立的，正常用户通过业务认证后获取播放的URL再请求视频播放，如果使用过程URL被窃取，则盗播者可简单的复制相同请求获取非授权服务。由于运营商原有的IPTV系统处于专网或可控访问范围下，节目内容盗播的概率很小，而IPTV升级为支持OTT，需要开放互联网访问，因此内容盗播【6】的概率很大，为解决该问题，需升级视频内容访问防盗链功能。
+防盗链技术实现原理是实现URL的合法性，可通过如下方式实现：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;（1）实现URL携带时效性参数
+用户获取的URL应该给予一个有效期，比如有效期是24小时，超时URL拒绝服务。EPG服务器在生成URL时加入时间参数返回给机顶盒，并同步给流媒体服务器，用于在视频播放时进行合法性校验。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;（2）实现URL携带唯一性标记参数
+用户通过认证时，EPG动态生成的播放URL，可把用户的IP地址作为URL的一个参数返回给机顶盒，用户使用携带IP参数的URL发起播放请求，流媒体服务器在校验URL时，检查IP参数是否一致，如果不相同则拒绝服务。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;（3）实现URL加密传输
+仅实现URL时效性和唯一性还不足真正做到防盗链，这是因为如果URL在传输过程是明文传输，极容易被窃听和被构造出合法的URL，因此，还需对URL在传输和呈现过程中进行不可逆加密。例如，EPG对如下原始URL：rtsp://gd.ott.cn/OTT/9999/pk101.ts?stbip=120.11.92.3&amp;amp;bt=20140420091010&amp;amp;userid=091031234&amp;amp;port=2014abcdef，将其中的路径截取出来并进行MD5加密，生成密文串3ddiaj94jfhgf7qb1idf0f8vcjudff0d，密文串作为参数加入到URL中，加密后的URL变成：rtsp://gd.ott.cn/OTT/9999/pk101.ts？stbip=120.11.92.3&amp;amp;bt=20140420091010&amp;amp;userid=091031234&amp;amp;port=2014&amp;amp;key=3ddiaj94jfhgf7qb1idf0f8vcjudff0d。流媒体服务器接收到终端机顶盒的请求时，也截取路径重复进行MD5计算，得出MD5值，和收到的URL中的key做对比，可验证URL是非法还是合法请求。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;5--结束语&quot;&gt;5  结束语&lt;/h3&gt;
+
+&lt;p&gt;运营商把既有的IPTV平台直接升级改造为兼容承载IPTV和OTT多重业务的平台，具有低投资成本和实现周期短的巨大优势，也是当前IPTV平台演进的趋势。本文分析OTT的业务开放性和网络无关性特征，提出终端接入和CDN部署适应网络无关性的技术方法，并提出一种CDN智能调度优化技术，结合ABR/VBR适应性码率，以及视频播放防盗链技术，为IPTV平台升级为开放性和网络无关性平台可能面临的难题提供了技术参考。&lt;/p&gt;
+
+&lt;h3 id=&quot;参考文献&quot;&gt;参考文献&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;RFC4445: A Proposed Media Delivery Index (MDI)[S]．2006&lt;/li&gt;
+  &lt;li&gt;Schwarz H, Marpe D, Wiegand T. Overview of the Scalable Video Coding Extension of the H.264/AVC Standard[J]. IEEE Trans. On Circuits and Systems for Video Technology, 2007, 17(9):1103-1120.&lt;/li&gt;
+  &lt;li&gt;邵壮丰等；广东IPTV业务服务质量提升研究【j】；电信科学；2012&lt;/li&gt;
+  &lt;li&gt;王云岚等；基于DNS的负载均衡算法研究【j】；计算机工程与应用；2002&lt;/li&gt;
+  &lt;li&gt;林勇志等；3G视频传输中码流自适应调整算法【j】；东南大学学报；2012&lt;/li&gt;
+  &lt;li&gt;郑绍辉等；反盗链技术研究；Computer Era【j】；2008&lt;/li&gt;
+  &lt;li&gt;李颖姝；IPTV服务视频质量客观评估方法的研究【D】；武汉理工大学；2009&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;作者简介&quot;&gt;作者简介&lt;/h3&gt;
+
+&lt;p&gt;邵壮丰，主要研究方向为IPTV/OTT技术架构、服务质量和网络安全&lt;/p&gt;
+</description>
+        <pubDate>Sat, 17 Dec 2016 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2016/12/17/IPTV%E5%B9%B3%E5%8F%B0%E6%89%BF%E8%BD%BDOTT%E4%B8%9A%E5%8A%A1%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/12/17/IPTV%E5%B9%B3%E5%8F%B0%E6%89%BF%E8%BD%BDOTT%E4%B8%9A%E5%8A%A1%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术发展</category>
+        
+        <category>原创</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>广东IPTV技术发展历程及下一阶段方向</title>
+        <description>&lt;p&gt;本文简要回顾广东IPTV发展历程，思考下个阶段IPTV规模发展的技术方向。&lt;/p&gt;
+
+&lt;p&gt;广东电信推出了IPTV业务已有近10年时间，IPTV业务发展至今已近&lt;code class=&quot;highlighter-rouge&quot;&gt; 700万用户 &lt;/code&gt;。10年坎坷路走过三个阶段，而今迎来发展新阶段：
+&lt;img src=&quot;/img/IptvEnv/4Steps.png&quot; alt=&quot;4Steps&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;第一阶段2007年至2008年起点&quot;&gt;第一阶段，2007年至2008年，起点&lt;/h3&gt;
+&lt;p&gt;在第一阶段，我们把IPTV业务搭建起来了，开始试点发展用户，也走在全国的前列（当时福建IPTV在国内发展最好）。在这个阶段，国内IPTV产业链刚起步，广电节目源、华为中兴UT等主要设备供应商的CDN平台和机顶盒解决方案，主要都是支持传统的&lt;a href=&quot;https://en.wikipedia.org/wiki/MPEG-4&quot;&gt; MPEG4 &lt;/a&gt;视频编解码技术，因此这个阶段使用的技术方案中，直播和VOD点播节目源采用了MPEG4编码技术，平台和承载网络采用基于TCP的单播模式，机顶盒采用裁剪的linux作为OS，只支持MPEG4解码。这种技术方案下，要在电视屏幕上相对清楚看节目，IPTV的标清节目的码率通常需要达到4Mbit/s的带宽，然而在2008年以前，普通宽带用户的带宽也就是2M/4M，显然这个条件很苛刻，难以大规模推广IPTV。这个起点阶段，攒机了&lt;code class=&quot;highlighter-rouge&quot;&gt; 20万 &lt;/code&gt;体验用户，开始了广东IPTV探索之路。&lt;/p&gt;
+
+&lt;h3 id=&quot;第二阶段2008年至2014年小试阶段&quot;&gt;第二阶段，2008年至2014年，小试阶段&lt;/h3&gt;
+&lt;p&gt;本阶段，我们的IPTV用户规模发展到了&lt;code class=&quot;highlighter-rouge&quot;&gt; 300万 &lt;/code&gt;。随着H264编码设备和支持H.264的机顶盒终端普及，在2008年下半年，我们启动了IPTV的改造升级，实现了IPTV视频编码从MPEG4升级为&lt;a href=&quot;https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC&quot;&gt; H.264 &lt;/a&gt;。升级到了H.264后，同等视频质量的节目带宽消耗足足降低了50%，即原来标清节目的带宽需求从4M降低到了2M，这是个很振奋人心的结果，从平台的H.264改造开始，放号得到了较快的发展。然而，这个阶段，是最坎坷的阶段，一方面，国内IPTV政策原因，放号阻力一直都很大，毕竟电信也做电视业务威胁到了广电；另一方面，初具百万级规模的IPTV平台，但整个IPTV系统架构、CDN平台网络资源能力、容灾应急能力存在很多缺陷，平台稳定性很差，经常出现故障，CDN动不动就瘫痪，运维压力及大。例如，由于IPTV平台一直采用基于TCP的单播技术提供服务，整个CDN和承载网络资源越发难以支撑大规模用户并发服务，特别是在有热点、焦点电视直播节目时，比如2011年日本海啸、奥运会热门比赛、春晚直播、阅兵直播等，平台仍然很脆弱，经常瘫痪，影响大片业务。这这个阶段，我们无数次地组织设备供应商（华为）分析故障原因、讨论解优化案、开发新版本、升级割接，也投资建设了大量的高性能CDN设备，大范围的故障逐步收敛，平台逐步支撑百万级用户规模发展。（注：不得不说也正是在广东的反复试水，华为的IPTV产品也逐步推广到全球）&lt;/p&gt;
+
+&lt;h3 id=&quot;第三阶段2014年2016发展阶段&quot;&gt;第三阶段，2014年2016，发展阶段&lt;/h3&gt;
+&lt;p&gt;此阶段，我们的用户规模发展到了近&lt;code class=&quot;highlighter-rouge&quot;&gt; 700万 &lt;/code&gt;。视频业务对CDN和网络带宽消耗很大，业界上视频类运营商很大的一部分投资也是花费在CDN和带宽租赁上。对于电信来说，带宽是自家的基础资源，刚开始用户规模小，采用点对点的单播技术能快速部署业务发展用户是重点，采用单播技术也没什么不妥，但随着IPTV用户大规模发展，IPTV视频对带宽和CDN资源消耗变得异常大，全省局部经常出现网络拥塞、无CDN可放号的矛盾，导致视频播放卡顿马赛克等现象。为解决这个矛盾，我们在2014年开展了全省CDN和承载网络的&lt;a href=&quot;https://en.wikipedia.org/wiki/Multicast&quot;&gt; IPTV组播技术 &lt;/a&gt;改造，至2015年初，组播改造完成后，直播频道在城域网三层网络上只需发布一路直播流、CDN服务器也只需占用一个连接，极大的节省了三层网络和CDN的带宽和计算资源，支撑了我们的IPTV用户规模发展到将近 700万 。&lt;/p&gt;
+
+&lt;h3 id=&quot;第四阶段2017年发展新阶段&quot;&gt;第四阶段，2017年，发展新阶段&lt;/h3&gt;
+&lt;p&gt;在新的阶段，我们的用户目标规模是要超过&lt;code class=&quot;highlighter-rouge&quot;&gt; 1000万 &lt;/code&gt;。第一阶段是IPTV业务的起点，实现了从无到有；在第二、三阶段，两项重大的技术应用，实现了我们IPTV用户的规模发展；当前来到了第四阶段，还有什么技术招式能提高CDN和带宽资源利用效能呢？当前在国内IPTV领域，国内包括百视通、CNTV、南传等内容提供商提供的绝大多数视频的编码格式仍是H.264，对标业界视频领域的发展，基于H.265的视频编码技术已有不少的应用场景，比如腾讯、PPS等都有H.265的应用专区，采用&lt;a href=&quot;https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding&quot;&gt; H.265 &lt;/a&gt;的视频编码，则同等视频质量的视频节目所需的带宽仅是H.264的50%、同时对CDN的计算资源、存储资源也将节约50%，因此是时候把IPTV的视频编码技术从H.264升级为H.265。升级为H.265，需要的改造点有：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;SP头端视频编码器的升级或替换，升级到支持H.265编码。&lt;/li&gt;
+  &lt;li&gt;CDN平台支持H.265技术（录制、流分发、流服务等）。&lt;/li&gt;
+  &lt;li&gt;机顶盒终端支持H2.65解码。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;在2016年，我们已经实现了CDN支持H.265技术，新入网的Android智能机顶盒也支持H.265解码，因此剩下的只需把视频源头端编码升级到H.265即可实现CDN计算存储资源和承载网络带宽资源的效能最大化利用，进一步支撑千万级用户规模发展。当然，现网还有很多存量的低端机顶盒不支持H.265解码，因此这部分机顶盒还要特别兼顾保留即有的H.264视频节目，同时，一定需要加快低端机顶盒的退网和更新换代才能跟上当下大视频业务发展趋势。&lt;/code&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 20 Nov 2016 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2016/11/20/%E5%B9%BF%E4%B8%9CIPTV%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E5%8F%8A%E4%B8%8B%E4%B8%80%E9%98%B6%E6%AE%B5%E6%96%B9%E5%90%91/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/11/20/%E5%B9%BF%E4%B8%9CIPTV%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E5%8F%8A%E4%B8%8B%E4%B8%80%E9%98%B6%E6%AE%B5%E6%96%B9%E5%90%91/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术发展</category>
+        
+        <category>原创</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>[原]IPTV网络运营端到端质量保障体系研究</title>
+        <description>
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;摘 要&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;本文从天翼高清（下简称IPTV）业务生命周期的视角，研究IPTV业务受理、安装和使用三个阶段存在的痛点，并为每个阶段设计了相应的保障方案，系统性地提出了IPTV端到端网络运营质量保障体系框架，并在广东电信IPTV实际生产环境中对标此保障体系进行实践，取得了较好成效，为广东近600万用户使用IPTV业务提供了保障。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;关键词&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;IPTV 网络运营质量 端到端 质量保障&lt;/p&gt;
+
+&lt;h2 id=&quot;1-引言&quot;&gt;1 引言&lt;/h2&gt;
+
+&lt;p&gt;随着三网融合的演进，IPTV业务已成为中国电信继语音、宽带、移动业务之后的又一基础业务。由于IPTV业务涉及头端节目源、CDN平台、承载网络（城域骨干、接入和家庭网络）、终端机顶盒和相关IT支撑系统，是一个复杂的端到端基础业务，如何高质量运营好IPTV业务对电信是一个巨大的挑战。近几年，各大运营商和业界有过一系列对IPTV业务质量保障方面研究，如文献［1］归纳了业务使用过程中在网络侧部署硬探针及用户机顶盒布放软探针，提取软硬探针数据指标的方式监控网络和机顶盒网元质量；文献［2-7］分析和采集影响机顶盒视频播放质量的指标，用于监测IPTV视频播放质量；文献［8］从传输的角度分析影响IPTV视频质量的因素；文献［9］中，华为公司提出视频体验衡量体系评价标准U-VMOS，U-VMOS重点用于测试评价播放过程中的视频质量。前述研究侧重点多集中在售后环节IPTV业务使用过程中，对IPTV终端机顶盒或IP网络运行质量监测进行探索，但鲜有从IPTV业务的到店受理、上门安装和日后业务使用过程进行系统性的质量保障研究。&lt;/p&gt;
+
+&lt;p&gt;区别于传统宽带、语音和移动业务等管道性业务，IPTV是一个“云管端”（节目源、平台、管道和终端）全链条形态的业务，我们要规模化发展和运营好IPTV业务，迫切需贯穿售前、售中和售后各环节，端到端地保障IPTV业务质量，因此，本文系统性地提出了一种IPTV端到端网络运营质量保障体系框架，并在实际生产中对标此保障体系持续进行应用实践，取得了一系列成效。&lt;/p&gt;
+
+&lt;h2 id=&quot;2-iptv业务周期介绍&quot;&gt;2 IPTV业务周期介绍&lt;/h2&gt;
+
+&lt;p&gt;IPTV业务周期经历了CRM受理、终端安装调测和安装后的使用三个阶段，每个阶段，会涉及电信各个不同的IT支撑系统和平台系统，如图1所示： 
+&lt;img src=&quot;/img/IptvE2e/p1.png&quot; alt=&quot;p1&quot; /&gt;
+图1 IPTV业务周期&lt;/p&gt;
+
+&lt;p&gt;受理流程A指在电信业务业务受理入口（如营业厅或网厅等）的客户关系管理（CRM）系统上进行业务受理开通，CRM生成的用户数据流经综合服务开通系统（SPS）同步到3A宽带认证平台用于网络拨号认证，再由3A平台同步给IPTV业务支撑支撑系统（UBSS），最后由UBSS同步到IPTV核心能力平台，实现用户数据在IT支撑系统、宽带认证系统和IPTV平台同步；同时，SPS还同步用户数据到综合调度系统，用于IPTV业务安装调测使用。&lt;/p&gt;
+
+&lt;p&gt;安装流程B指IPTV装维人员采用APP终端，将IPTV机顶盒MAC地址通过扫二维码方式录入到综调系统，达到终端设备MAC码和从SPS同步过来的用户开户数据的绑定，再同步给UBSS和IPTV终端管理系统（TMS），这个环节的数据同步，是为IPTV机顶盒在用户家庭安装现场达到机顶盒免配置快装的目的。新机顶盒接入网络时，由机顶盒预配置的拨号账号或提前录入的MAS地址作为拨号账号进行自动PPPoE或IPoE拨号，网络拨号通过后，TMS会根据机顶盒MAC地址比对由前面综调经UBSS同步过来的IPTV网络账号和业务账号信息，把MAC地址所绑定的网络账号和业务账号信息自动下发给机顶盒，这时，机顶盒拥有了所有账号信息，无需人工采用遥控器输入各种信息，很大程度提升了机顶盒现场安装调测效率。&lt;/p&gt;
+
+&lt;p&gt;业务使用流程C，指安装完成后，用户在日常使用IPTV时的流程，使用流程包括了网络拨号认证、业务认证和接入IPTV EPG、IPTV视频播放服务。网络认证接入，是机顶盒采用PPPoE或IPoE方式进行网络拨号认证，认证通过后获取承载BRAS或DHCP Server分配的IP地址接入到IPTV网络中；业务认证和接入EPG，是机顶盒使用业务账号发起认证鉴权，认证通过后获取匹配的EPG模版，用户在电视机上就能看到EPG主界面；视频播放服务流程，用户操作EPG界面，播放选中的直播频道或VOD点播节目，若访问的是组播视频则由BRAS或OLT复制组播视频流给用户，若访问单播视频，则IPTV CDN按照调度策略分配合适的流媒体服务器为用户播放单播视频节目，具体流程如图2：
+&lt;img src=&quot;/img/IptvE2e/p2.png&quot; alt=&quot;p2&quot; /&gt;
+图2 IPTV使用流程&lt;/p&gt;
+
+&lt;h2 id=&quot;3-iptv业务周期各环节的痛点&quot;&gt;3 IPTV业务周期各环节的痛点&lt;/h2&gt;
+
+&lt;h3 id=&quot;31-业务受理&quot;&gt;3.1 业务受理&lt;/h3&gt;
+
+&lt;p&gt;IPTV业务受理开通环节，涉及IT支撑系统（CRM、SPS）、宽带认证平台（3A）、IPTV能力平台（UBSS和核心平台）等多个系统，在图1的A流程所示，CRM业务受理生成的用户数据需从左到右流转到IPTV核心平台中，这种模式存在若干隐患：其一，平台间是串联的方式，容易造成数据同步延迟大、且环节多中间任一平台或网络出现异常容易导致整个工单流中断或堵单，进而引起前后台系统数据不一致；其二 ，前端平台通常承载综合业务，常需承载大规模业务量，由于系统能力差异，有些生产环境中会采用异步批量同步接口模式，由于缺乏点对点实时反馈机制，也容易导致前后台数据不一致，前后台数据不一致最终会导致IPTV会造成数据混乱和后续计费出账异常；在广东IPTV现网中，此环节发生故障的概率是较高，前后端业务和维护人员吃过不少亏。&lt;/p&gt;
+
+&lt;h3 id=&quot;32-业务安装&quot;&gt;3.2 业务安装&lt;/h3&gt;
+&lt;p&gt;传统的IPTV业务安装，通常需要手工使用遥控器输入各种账号密码数据到IPTV机顶盒中，而采用遥控器输入复杂的账号密码数据效率是低下的，因此电信在对机顶盒安装环节正逐步演进到安装现场数据“零配置”，而由终端网管自动下发。在业务安装环节，也存在如下痛点：一是由于3.1所述导致的数据不一致性问题，如数据在UBSS不存在、状态不正确、机顶盒或账号绑定关系不正确、订购产品不符、订购权限未开通等，会导致一线装维人员现场安装失败；二是安装现场给用户演示IPTV业务可能遇到视频播放黑屏、视频卡顿、EPG操作响应慢等问题；引起这些问题的原因可能涉及端管云各个环节，且现场缺乏有效便捷的支撑工具手段，这些问题是当前装维人员的痛点，会影响一线装维效率，同时可能给客户留下负面印象，对IPTV品牌造成影响。&lt;/p&gt;
+
+&lt;h3 id=&quot;33-业务使用&quot;&gt;3.3 业务使用&lt;/h3&gt;
+&lt;p&gt;首先，IPTV业务使用过程，可能遇到的问题包括了网络接入失败、业务账号认证鉴权失败、EPG接入失败、EPG操作响应慢、EPG弹出错误代码、IPTV视频播放黑屏、视频播放卡顿、视频出现马赛克、视频播放过程中断报错等，这些故障会直接影响用户的体验体验。引起这些故障的原因有多方面：对网络接入或业务认证鉴权失败的原因，多是账号状态异常或前后台数据不一致，也有可能是由于系统故障导致，需要具体甄别；对于EPG接入失败或EPG操作响应慢或EPG报错，则多是因为机顶盒到EPG网络不通或网络拥塞或EPG服务端性能不足或EPG模版代码逻辑错误导致；对于视频播放黑屏、卡顿、马赛克或播放中断，则多是由于机顶盒到视频服务端网络质量异常，或视频服务端性能不足或头端节目源异常导致；而对引起EPG体验和视频体验劣化的原因，常常和CDN内容分发因素相关。其次，在遇到故障后，用户发起故障申告，时常会遇到运营商修障时间长，故障复发等问题。统计发现在现网中，广东IPTV约有60%以上的故障工单在用户、10000号和预处理专席环节无法处理，需要流转到一线和二线维护处理，这对用户和维护人员都是一个痛点。&lt;/p&gt;
+
+&lt;h2 id=&quot;4-iptv端到端网络运营质量保障体系&quot;&gt;4 IPTV端到端网络运营质量保障体系&lt;/h2&gt;
+
+&lt;h3 id=&quot;41业务受理保障&quot;&gt;4.1业务受理保障&lt;/h3&gt;
+
+&lt;p&gt;3.1节的业务受理存在问题揭示了前后台串行模式和接口同步机制存在隐患，给业务开通和后续运营工作带来障碍，需进行优化。我们提出如下优化方案：第一是改造前后台关键接口串行模式为并行模式，即使把“SPS－AAA－UBSS”模式改造为“SPS－AAA”和“SPS－UBSS”并行模式，并把接口同步机制从异步批量改造为实时双向同步机制。新模式提升了数据同步实时性，并减少了因为网络不可达或末端系统故障等原因引起的丢单或卡单现象。第二是需要在数据同步的源头或触发端增加数据稽核功能，即要在SPS增加对同步给AAA、UBSS和综调度的三份数据进行一致性监测、在UBSS增加对同步IPTV核心系统和其他增值系统的数据一致性检测、在综调系统增加同步TMS的数据一致性检测校验，通过制定数据比对规则和任务，周期性触发数据校验，并且在校验发现异常时能触发数据重新覆盖修复，以此降低数据不一致性带来的连锁影响，优化后的架构如图3所示：
+&lt;img src=&quot;/img/IptvE2e/p3.png&quot; alt=&quot;p3&quot; /&gt; 
+图3 IPTV业务受理接口架构优化图&lt;/p&gt;
+
+&lt;h3 id=&quot;42业务安装保障&quot;&gt;4.2业务安装保障&lt;/h3&gt;
+&lt;p&gt;在保障业务安装快速顺利完成，本文给出如下举措：第一，IPTV装维人员在收到系统派发的安装单后在上门前，需发起对用户数据一致性的校验和进行数据拨测，可以在上门安装前先行判断安装单中用户数据和后台数据是否一致，若出现不一致则协调解决后再上门安装，如图4所示，这些功能的实现通常可在掌上APP工具上做开发，通过调用后台各系统的查询接口或认证接口实现。第二，在业务演示时出现体验类质差问题，和日常使用可能遇到的体验类故障相似，具体举措在4.3节统一提出。
+&lt;img src=&quot;/img/IptvE2e/p4.png&quot; alt=&quot;p4&quot; /&gt; 
+图4 上门安装前数据校验功能图&lt;/p&gt;
+
+&lt;h3 id=&quot;43业务使用保障&quot;&gt;4.3业务使用保障&lt;/h3&gt;
+
+&lt;h4 id=&quot;431-保障思路和目标&quot;&gt;4.3.1 保障思路和目标&lt;/h4&gt;
+
+&lt;p&gt;3.3节显示IPTV业务涉及使用过程中可能遇到各种故障，要保障好IPTV业务体验，我们从两个方面进行保障：一是面向平台网络，打造IPTV主动运维监测体系，持续高效监测IPTV端到端系统的运行情况，对发现的异常及时落实相应的整改措施，尽量在用户投诉前解决故障，减少用户报障数量；二是面向用户服务，打造IPTV用户故障快速处理体系，对用户发起的投诉报障，在受障的靠前环节进行快速定界和解决，如图5，目标是力争把60%以上的故障压缩在远程预处理及更前的环节解决，尽量减少一线上门处理，从而缩短故障处理时限，提升客户服务感知，同时也降低运维成本。
+&lt;img src=&quot;/img/IptvE2e/p5.png&quot; alt=&quot;p5&quot; /&gt; 
+图5 靠前解决用户故障，提升修障效率&lt;/p&gt;
+
+&lt;h4 id=&quot;432-iptv源云管端主动运维体系&quot;&gt;4.3.2 IPTV“源云管端”主动运维体系&lt;/h4&gt;
+&lt;p&gt;要保障IPTV业务使用，首先要监测系统运行状况，及时发现系统运行各项KPI指标，并以此为抓手，针对发现的问题采取相应的措施实施优化。要达到这个目标，我们对照IPTV端到端架构，分析IPTV业务体验感知强相关的KPI指标，设计出一套符合实际的KPI监测体系，用于主动监测IPTV系统运行情况和用户的业务体验质量。&lt;/p&gt;
+
+&lt;p&gt;如图6所示，IPTV端到端架构由头端节目源（源）、CDN平台（云）、IP承载网络（管）和客户网络及IPTV机顶盒（端）组成，其中节目源是SP注入到运营商CDN的平台；CDN平台主要承担节目内容的分发、EPG和流能力服务和用户产品管理等，CDN常由多级CDN共同构成；承载网络由IP骨干网、城域网入网组成；客户网络及IPTV终端包括了用户家庭网络和IPTV机顶盒，为用户呈现IPTV业务。
+&lt;img src=&quot;/img/IptvE2e/p6.png&quot; alt=&quot;p6&quot; /&gt;
+图6 IPTV端到端网络架构&lt;/p&gt;
+
+&lt;p&gt;IPTV系统运行和业务体验质量和“源云管端”息息相关，在整个链条中，任一环节都有可能影响体验质量，因此根据图6的IPTV架构以及图2的IPTV业务使用流程，结合多年的IPTV维护经验，我们分析出IPTV系统侧可能影响IPTV业务质量的主要因素及其关系，并总结出用于刻画和反映系统运行和业务体验感知质量的端到端的主要KPI指标，见表1。
+&lt;img src=&quot;/img/IptvE2e/t1.png&quot; alt=&quot;t1&quot; /&gt;
+表1 刻画IPTV系统运行和业务体验感知质量的主要KPI&lt;/p&gt;
+
+&lt;p&gt;我们把表1的KPI指标，投射到IPTV“源云管端”分层模型上，形成了表2的“源云管端”的监测体系：分节目源、CDN平台、承载网络和终端四类监控对象，每类对象按照动态和静态两个纬度，每个纬度又分应用服务、中间件和操作系统三个层面，分别列举出了重要的运行KPI指标，用于衡量IPTV源头、平台和承载网络的系统的运行情况。其中，动态KPI主要是监测系统实时运行的指标，综合这些指标能能监控系统运行质量，是日常保障工作最重要的风向标；静态KPI指标适用于对系统做阶段评估分析使用；并推荐把这些指标接入到运营商的综合网管（通常用于全专业系统监控，适合快速监控通用性KPI指标，对特殊KPI指标定制化能力弱）和专业网管（专用业务监控，适用专业KPI指标定制监控）上进行7*24小时监控，发挥出主动运维能力，及时发现、挖掘和解决问题。
+&lt;img src=&quot;/img/IptvE2e/t2.png&quot; alt=&quot;t2&quot; /&gt;
+表2 IPTV“源云管端”质量监测体系&lt;/p&gt;
+
+&lt;h4 id=&quot;433-iptv用户故障快速处理体系&quot;&gt;4.3.3 IPTV用户故障快速处理体系&lt;/h4&gt;
+&lt;p&gt;为快速处理IPTV用户申告的故障，需要有用户业务使用时、特别是故障发生时机顶盒、节目源、CDN和网络的各种和体验质量数据作为故障诊断处理的基础。我们围绕下面两方面来实现这个目标：&lt;/p&gt;
+
+&lt;p&gt;第一，规划设计一套IPTV业务体验质量监测系统（SQM）用于采集端到端和体验质量相关的数据，特别是周期性的采集和记录IPTV机顶盒在日常使用过程历史播放行为和体验质量指标数据，形成用户的健康档案，在故障申告随时提供数据支撑能力。我们设计如图7的SQM架构，其中A和B区构成SQM系统，A区是SQM的服务端，B区是SQM探针采集客户端；在B区中，终端探针采集机顶盒播放信息和体验质量数据，直播源监控探针采集组播源播放质量数据，CDN探针采集CDNPOP点网络质量数据，拨测探针采集定制或临时发起的EPG和流媒体播测质量数据。各探针采集到的数据通过B-&amp;gt;A接口送到SQM服务端，结合南向接口收集C区的接入网DTS、城域网网管、ITMS和 UBSS相关数据，在SQM服务端计算分析模块进行数据计算、关联分析和入库，计算结果用于故障定界、体验质量报表、告警模块和交互呈现模块使用为SQM故障处理人员处理故障提供参考，同时为SQM监控人员提供IPTV趋势性和实时性的体验质量监控使用。同时，SQM终端管理TMS模块可用于远程对用户机顶盒发起配置修改和业务拨测；SQM通过北向接口，向D区的客户服务支撑系统提供用户健康档案等数据查询和业务拨测能力开放，支撑IPTV客户服务故障的快速定位和处理。探针采集的数据和南向接口同步的内容见表3。
+&lt;img src=&quot;/img/IptvE2e/p7.png&quot; alt=&quot;p7&quot; /&gt; 
+图7 IPTV SQM架构图
+&lt;img src=&quot;/img/IptvE2e/t3.png&quot; alt=&quot;t3&quot; /&gt;
+表3 探针采集数据和南向接口同步数据内容&lt;/p&gt;
+
+&lt;p&gt;第二，针对运营商客户服务流程，我们设计基于用户机顶盒和EPG的自助服务系统用于引导用户进行故障自检，以及规划设计10000号客服系统、故障预处理支撑系统、一线装维APP和二线维护系统调用SQM开放接口的能力，用于获取用户健康档案等数据和触发机顶盒故障定界，以支撑维护人员快速处理用户故障，形成贯穿IPTV客户服务各环节的故障处理支撑体系。表4是各支撑系统对用户故障处理支撑能力以及SQM开放接口提供的能力，图8和图9是在机顶盒上进行故障自助服务的原型，图10是SQM故障定界原型，可能外部系统调用。
+&lt;img src=&quot;/img/IptvE2e/t4.png&quot; alt=&quot;t4&quot; /&gt;
+表4 SQM开放接口获取的数据
+&lt;img src=&quot;/img/IptvE2e/p8.png&quot; alt=&quot;p8&quot; /&gt;    &lt;br /&gt;
+图8 机顶盒自助服务：一键检测   &lt;br /&gt;
+&lt;img src=&quot;/img/IptvE2e/p9.png&quot; alt=&quot;p9&quot; /&gt;
+图9 机顶盒自助服务：在线反馈故障
+&lt;img src=&quot;/img/IptvE2e/p10.png&quot; alt=&quot;p10&quot; /&gt; 
+图10 SQM故障定界样例&lt;/p&gt;
+
+&lt;h2 id=&quot;5总结&quot;&gt;5总结&lt;/h2&gt;
+
+&lt;p&gt;本文分析了IPTV业务周期三个阶段面临的痛点，针对每一阶段，分别设计了对应的保障方案：在业务受理方面，我们规划了支撑系统架构优化的方案；在业务安装保障方面，我们规划了终端安装前的数据校验和拨测方案；在业务使用保障方面，我们分析设计了“源云管端”主动运维体系和用户故障快速处理体系。我们正对标上述保障体系，在广东电信IPTV现网开展相应实践应用，取得了阶段性的成效。特别在业务使用保障方面，对“云”端，规划建设了IPTV专业网管重点对全网CDN设备进行业务服务层和中间件服务统一监控，包括采用全网CDN出局流量、CDN内容分发、业务服务调度等25类KPI指标；使用电信统一综合网管监控CDN 设备6项通用操作系统级指标；在“管”，纳入城域网统一网管监控；在“源”和“端”方面，规划了SQM系统综合监测全网将近500个直播频道和500多万机顶盒业务质量趋势；基本上从“源云管端”形成了一个较完整的保障框架，这些工具手段有效支撑了全网5000台服务器日常主动运维工作，也为广东近600万用户使用IPTV业务提供了有效保障。未来，我们将围绕提升IPTV用户体验感知这一中心，不断迭代完善IPTV端到端保障体系，并在整个业务生命周期进行实践检验。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考文献&quot;&gt;参考文献&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;陈涛；IPTV 端到端业务质量监测系统的技术探索［D］；邮电设计技术；201605&lt;/li&gt;
+  &lt;li&gt;邵壮丰等；广东IPTV业务服务质量提升研究［j］；电信科学；2012&lt;/li&gt;
+  &lt;li&gt;熊雄；基于电信IPTV的服务质量监测与实现［j］；计算机工程；2014年05期&lt;/li&gt;
+  &lt;li&gt;沈爱华；IPTV 终端服务质量监控策略及改进技术研究［j］；通信技术；201604&lt;/li&gt;
+  &lt;li&gt;范少芬;基于网络损伤和流媒体特征的IPTV视频QoE评估方法的研究和应用[D];华东师范大学;2011&lt;/li&gt;
+  &lt;li&gt;陈玉花;张治中;杜西亚;IPTV测试仪测试指标提取方案研究[J];电视技术;2009年02期&lt;/li&gt;
+  &lt;li&gt;李颖姝;IPTV服务视频质量客观评估方法的研究[D];武汉理工大学;2009&lt;/li&gt;
+  &lt;li&gt;张桂卿；IPTV视频传输质量问题分析［j］；广播与电视技术；2014年41卷&lt;/li&gt;
+  &lt;li&gt;华为U-VMOS；http://developer.huawei.com/cn/ict/Products/TelecoSoftware/VideoExperienceCapbility/U-vMOS/SDK；201601&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        <pubDate>Tue, 23 Dec 2014 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2014/12/23/IPTV%E7%BD%91%E7%BB%9C%E8%BF%90%E8%90%A5%E7%AB%AF%E5%88%B0%E7%AB%AF%E8%B4%A8%E9%87%8F%E4%BF%9D%E9%9A%9C%E4%BD%93%E7%B3%BB%E7%A0%94%E7%A9%B6/</link>
+        <guid isPermaLink="true">http://localhost:4000/2014/12/23/IPTV%E7%BD%91%E7%BB%9C%E8%BF%90%E8%90%A5%E7%AB%AF%E5%88%B0%E7%AB%AF%E8%B4%A8%E9%87%8F%E4%BF%9D%E9%9A%9C%E4%BD%93%E7%B3%BB%E7%A0%94%E7%A9%B6/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术</category>
+        
+        <category>端到端</category>
+        
+        <category>质量保障</category>
+        
+        <category>原创</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>基于SDN思想的OTT CDN内容分发和业务调度优化</title>
+        <description>&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;摘要&lt;/code&gt;：&lt;/p&gt;
+
+&lt;p&gt;本文分析SDN技术特点和优势，提出基于SDN的CDN内容分发和业务调度优化方案，通过SDN思想与传统CDN的结合，构建新的内容分发控制平面，获得OTT全网拓扑数据，实现OTT内容的最优化和接口自动部署，节约带宽资源和提高分发效率；提出在OTT调度控制平面中增加CDN节点级负载和服务质量两个指标，实现对边缘节点的过载保护机制，提升终端用户业务调度灵活性和业务服务质量。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;关键词&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;SDN  OTT  CDN  内容分发  业务调度&lt;/p&gt;
+
+&lt;h3 id=&quot;1--引言&quot;&gt;1  引言&lt;/h3&gt;
+
+&lt;p&gt;近几年，OTT业务的快速发展， 2013年国内OTT用户规模达到500万，年环比增长超过100%。国内电信运营商IPTV用户规模为2500万，年增长为25%，增长率落后于OTT，行业发展趋势和竞争压力，倒逼着运营商在推进IPTV业务的同时也发展OTT业务。2014年中国电信集团公司层面也退出了“悦me”品牌的OTT业务，各省电信公司也相继推出了智能机顶盒，如广东电信的EC6108智能机顶盒，提供了OTT业务；同时随着宽带光纤大带宽化的发展趋势，未来互联网和移动互联网，必将仍以高清、超高清和4K等视频流媒体来填充带宽，OTT业务是未来业务发展的发力点，而平台网络资源如何有效支撑OTT业务快速灵活发展需求是关键点，因此OTT平台网络合理布局重要性也进一步凸显。&lt;/p&gt;
+
+&lt;p&gt;OTT技术目标是实现节目内容高效分发到各OTT的CDN节点让用户流畅的体验到OTT节目，其中OTT的CDN技术是核心。传统的CDN是“中心节点——区域Cach一级缓存节点——边缘Cach二级缓存节点”或“中心节点——边缘Cach缓存节点”的层级节点。此架构下，在用户访问流程上，由于区域或边缘Cach缓存节点一般分布式部署在不同运营商不同城市，OTT机顶盒请求视频节目，通过DNS获取代理调度服务器地址，调度到离用户最近的CDN节点访问视频服务，但若某地区视频流并发访问量激增，则需要通过增设扩容流媒体服务器来支撑业务发展需求，该模式难以应对动态访问请求，且这种补丁式的解决方案常给工程建设和运维工作带来各种问题；在OTT内容分发上，中心节点把节目源推送到各级缓存节点过程存在带宽资源量的严重损耗，特别随着SP和频道数量增加以及未来蓝光、超高清和4K节目的不断上线，在承载网中分发的节目源消耗带宽越来越多。&lt;/p&gt;
+
+&lt;p&gt;总体来看，当前OTT CDN系统存在无法了解网络全局拓扑，无法感知网络状态信息，缺乏控制路由的手段与能力，无QoS保障；增设硬件的方式不仅带来后续的运维负担，配置的改变也会给用户体验带来影响；OTT上游缓存节点和下游同域缓存节点之间存在重复流量，浪费带宽资源；而这些问题的本质是由于CDN的网络开放程度不足，不具整体标准，难以形成中心化的控制及调度机制，导致性能瓶颈。&lt;/p&gt;
+
+&lt;p&gt;为解决OTT CDN开放程度不足等问题，需要在网络中加入管控机制，通过中间层的业务调度引擎实现一体化服务，而SDN【1，2】（Software Defined Networking）给我们提供了一种借鉴方法。SDN是一种基于软件可编程思想的网络架构，通过将控制平面与转发平面解耦，控制平面采用集中式统一调度，网络提供者可以根据需求，为用户实时动态分配资源，转发平面则专注于转发功能的实现，从而达成效率提升。同时SDN通过开放且完备的编程接口，打破厂商对设备的垄断，通过控制转发分离与灵活的可编程性，SDN具有高效灵活调度资源的能力，并解决可扩展性的问题。SDN的思想是实现IP层网络设备的控制转发分离、集中式控制和南北向开放API编程接口，可以提升基础网络的承载效率。但SDN的思想也可应用在高层应用服务上，例如在OTT CDN上采用SDN技术，可以实现CDN智能感知流量，实现流量统计与分析聚类，可针对需求及网络状态，实时调度底层计算资源，提升内容分发和业务调度的可用性，降低运营维护成本。&lt;/p&gt;
+
+&lt;h3 id=&quot;2--sdn技术及其特点&quot;&gt;2  SDN技术及其特点&lt;/h3&gt;
+&lt;p&gt;SDN是一种新型的网络架构，它的设计理念是将网络的控制平面与数据转发平面进行分离，从而通过集中的控制器中的软件平台去实现可编程化控制底层硬件，实现对网络资源灵活的按需调配。SDN有狭义的和广义上的概念，狭义的SDN是指从OpenFlow发展而来的一种新的网络技术，其前身是斯坦福的用于企业集中安全控制的Ethane项目，2008年Nick Mckeown将其命名为OpenFlow，经由斯坦福Clean State项目大力推广，概念逐渐外延为SDN。 广义的SDN是满足控制转发分离、逻辑集中控制和开放API三个特征的新型网络架构和新的网络和应用软件实现方法论，而不是某种具体的网络技术【3,4,5】。
+&lt;img src=&quot;/img/IptvSdn/p1.png&quot; alt=&quot;p1.png&quot; /&gt;
+图1 SDN控制转发平面分离和集中式控制
+&lt;img src=&quot;/img/IptvSdn/p2.png&quot; alt=&quot;p2.png&quot; /&gt;
+图2 SDN开放API接口&lt;/p&gt;
+
+&lt;p&gt;SDN的总体架构如图1和图2所示。在图1中，SDN分为转发平面和控制平面，转发平面由通用化的网络转发设备组成，接受控制平面的指令，执行报文的转发及网络层的操作等；控制平面即SDN控制器，通过南向接口实现对转发面设备的集中管理和控制。在图2中，SDN控制器更可以灵活定义网络，实现网络抽象化、虚拟化，通过北向接口为上层的应用提供网络能力调用接口，实现了网络能力的开放。SDN架构带来了以下变化：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;控制平面和转发平面的分离，使得转发平面的功能趋于简单，对设备的软、硬件需求趋于通用化，网络的结构、层次将更加简单；&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;集中的SDN控制器，可实现大量网元的管理和控制，可拥有全局的网络视图，可基于全局视图实施网络规划设计、网络优化、运维管理；&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;控制平面可采用软件灵活定义网络，网络将更加智能，能更好感知网络和业务，网络资源的整合成为可能，与IT设施的协同成为可能；&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;SDN控制器可通过北向接口为上层应用提供网络服务，使得应用可获得所需的网络资源或可管理控制相应的网络资源，应用和网络的联系将更加紧密。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;3--基于sdn的ott-cdn技术&quot;&gt;3  基于SDN的OTT CDN技术&lt;/h3&gt;
+
+&lt;p&gt;OTT CDN的核心目标是实现节目内容在CDN应用网络中高效分发和实现OTT用户流畅播放OTT视频节目，其焦点是视频流数据的高效转发，而实现视频数据高效转发的前提是CDN具备全局合理的分发和调度策略。广义的SDN架构能够实现集中式的控制平面，获得全网拓扑以及实现流量优化控制，能够有效补充OTT CDN技术的不足，进而提升内容分发能力，改善用户视频体验。&lt;/p&gt;
+
+&lt;h4 id=&quot;31-内容分发机制优化&quot;&gt;3.1 内容分发机制优化&lt;/h4&gt;
+
+&lt;p&gt;现网OTT CDN的节目方法方向是预配置模式，基于HLS或RTSP协议的直播频道从中心节目源预配置固定方向和固定数量推送至指定的CDN节点，如下图：
+&lt;img src=&quot;/img/IptvSdn/p3.png&quot; alt=&quot;p3.png&quot; /&gt;
+图3现网OTT HLS等节目推流模型&lt;/p&gt;
+
+&lt;p&gt;预配置定向和定量的方式，在OTT CDN规模小的时候，可支撑业务发展，但随着CDN规模的扩容，预配置模式一方面是极大浪费骨干网和城域网带宽资源，以及每次调整配置，都需要付出巨大的运维工作量，且该模式无法适应业务的灵活动态智能调整，无法支撑业务发展需求。例如，有1个SP，有100路频道，按3M、5M和8M三种码流提供服务，假设有200个CDN边缘节点分布在不同城市和不同运营商网络内，则要实现CDN的完整覆盖，则需要分发的总频道数量是60000路（3种码流 x 100路 x 200个CDN），总骨干网流量需要占用312G流量（100路 x（3M+5M+8M）x6万路），而这还未考虑一个CDN节点内部单台流媒体服务器性能无法支撑高并发需求而增加拷贝频道分布。要支撑大规模OTT CDN业务部署，需要改变现有CDN的预配置模式，我们提出一种基于SDN的CDN频道智能动态分发机制。&lt;/p&gt;
+
+&lt;p&gt;基于SDN的CDN频道智能动态分发机制，在每个CDN节点之上，增加节目分发集中控制平面，CDN内部每台流媒体服务器，和节目分发控制平面通过API接口进行通信，API接口可采用既有的Soap协议，控制平面对CDN边缘节点的节目分发数量和热度的统一监控，并提供统一的智能动态配置功能，实现以最省带宽和计算资源，快速收敛出节目频道分发的策略，在审核确认后，智能进行节目引流数量和引流方向的最优配置和调优。如下图：
+&lt;img src=&quot;/img/IptvSdn/p4.png&quot; alt=&quot;p4.png&quot; /&gt;
+图4 CDN内容分发控制平面&lt;/p&gt;
+
+&lt;p&gt;上图中，新增CDN内容分发控制平面，控制平面实现如下功能：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;CDN控制平面获取分发拓扑：CDN流媒体设备向CDN内容分发控制平面注册，上报内容分发现状，控制平面获得传统CDN难以获取的全网内容分发拓扑。&lt;/li&gt;
+  &lt;li&gt;内容分发策略最优化和自动化：CDN内容分发控制平面根据内容分发拓扑数据，可快速制定节目分发的最佳策略，并实现把策略通过可视化操作界面，通过API接口下发CDN流媒体服务进行配置，实现配置策略的最优化和配置的自动化，极大提升运维和运营效率。&lt;/li&gt;
+  &lt;li&gt;内容分发策略智能化：CDN内容分发控制平面根据周期性监控流媒体服务器上报的内容分发运行状态、业务并发量，智能计算出系统全网CDN实时负荷，并触发内容分发策略的更新。
+利用CDN内容分发控制平面，CDN源节点只需一份或少量几份HLS流先推边缘节点，再由边缘节点向同级边缘节点和本节点内部进行二次推流，实现带宽资源的节约和部署效率的极大提升。例如在实现CDN相同的覆盖下，多个边缘缓存CDN节点可根据所处的运营商网络共享1份或少数几份HLS流，频道推流数量分发数量下降到原来的10%或更少，总骨干网流量仅需占用不到30G流量；原来配置一个节点的分发工作涉及所有HLS频道，可能耗时8个小时，现在通过分发控制平面由系统接口完成，耗时只需几分钟，极大节约带宽成本和运维成本。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;32-终端业务调度优化&quot;&gt;3.2 终端业务调度优化&lt;/h4&gt;
+
+&lt;p&gt;OTT调度常用DNS轮询负载均衡技术【6】，DNS的思想是把用户调度到用户最近的CDN节点。现网OTT的终端接入业务调度，我们使用下述模型进行刻画：模型中有F函数和G函数，F函数描述了机顶盒接入时，DNS调度系统根据用户终端的IP地址，调度到本DNS对OTT域名解析出的地址的CDN系统，把机顶盒首先调度到预配置的CDN（i）节点。模型中G函数描述了机顶盒调度到一个CND（i）节点后，在节点内部对流媒体服务器的寻址调度，调度过程是一个四元组合模式，即依据节点内服务器是否有请求的节目内容、服务器的健康度（如CPU、内存是否超限或磁盘是否故障）、本台服务器并发用户数是否超License和选择负载（如流量）最轻的服务器为用户提供视频服务，F和G函数分别实现了CDN节点级和节点内部的寻址调度过程。
+&lt;img src=&quot;/img/IptvSdn/p6.png&quot; alt=&quot;p6.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;上述CDN调度机制存在的最大瓶颈在于由于OTT业务有突发性（如OTT内容节目冷热切换快或有突发的焦点节目、以及某些时间段用户物理位置接入点变化大），由于CDN节点在短时间内无法满足业务突发需求进行扩容，因此容易造成局部CDN节点服务拥塞进而可能导致OTT业务服务质量下降。要解决该瓶颈，实现支撑突发业务时对OTT CDN节点进行软扩容和在业务闲时对CDN节点进行缩容以节能省成本，需要对OTT终端的业务调度策略需进行优化。&lt;/p&gt;
+
+&lt;p&gt;本文提出了一种基于SDN思想的业务调度策略优化机制，即增加CDN节点出口带宽负载和节点视频服务质量的多维调度机制，提升了CDN节点的服务质量可靠性和简化了IP预配置，具体模型如下：
+&lt;img src=&quot;/img/IptvSdn/p7.png&quot; alt=&quot;p7.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;CDN节点级的负载和节点级质量调度：引入节点级负载和节点级服务质量两个调度变量，实现系统对CDN节点总负载和节点服务质量进行识别，若负载或服务质量指标超过合理阀值，则F’函数进行递归重新计算直到选择更合适的CDN节点，再进入G函数进行节点内部的服务器寻址调度，最终为用户分配一个最优的CDN节点和一台流媒体服务器提供视频服务。&lt;/p&gt;
+
+&lt;p&gt;要实现OTT系统能根据节点级总负载和节点级整体服务质量两个指标进行最优化调度，可通过控制平面对流媒体服务器上报的单机负载和终端服务器质量进行采集和综合计算，计算得到的结果开放给调度模块使用，流程如下图所示。
+&lt;img src=&quot;/img/IptvSdn/p5.png&quot; alt=&quot;p5.png&quot; /&gt; 
+图5 节点级负载和服务质量指标纳入调度机制&lt;/p&gt;
+
+&lt;p&gt;其中，OTT用户终端的服务质量指标的采集和计算，参考我们的另外的研究论文【7】。
+至此，我们基于SDN的控制和数据转发分离、上游集中控制、API接口开放的理念，提出了基于SDN的OTT CDN内容分发和业务调度优化方案，该方案可极大节约OTT内容分发的带宽成本和运维成本，提升了用户业务调度的灵活性和视频服务质量，也为我们进行OTT系统的升级改造提供了方向。&lt;/p&gt;
+
+&lt;h3 id=&quot;4--结束语&quot;&gt;4  结束语&lt;/h3&gt;
+
+&lt;p&gt;狭义的SDN主要应用在IP网络层，现网存量的网络设备是无法支持控制和数据转发的分离等特点，因此在短时间内，要实现IP基础网络的SDN架构是不现实的，但SDN的思想却可以给高层的应用服务借鉴，实现软件功能模块的解耦合，进而降低应用服务的复杂性、提升扩展能力和部署效率等，因此本文把SDN的思想应用到了OTT业务上。&lt;/p&gt;
+
+&lt;p&gt;传统OTT CDN的内容分发消耗带宽大、分发难度大，CDN业务调度无法解决局部边缘节点突发业务量大过载的现状，导致OTT建设和运维运营成本高、用户体验感知不佳等问题。本文提出基于SDN的CDN内容分发和业务调度优化方案，通过SDN与传统CDN的结合，构建新的内容分发控制平面，获得OTT全网拓扑数据，动态计算和分配资源，实现OTT内容的最优化和接口自动部署，节约了带宽资源和提升了节目分发效率；通过升级OTT业务调度模型，提出在OTT调度控制平面中增加CDN节点级负载和服务质量两个指标，实现对边缘节点的过载保护机制，进而提升终端用户业务服务质量。&lt;/p&gt;
+
+&lt;h3 id=&quot;参考文献&quot;&gt;参考文献&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;Sixto  Ortiz  Jr.;”Software-Defined  Networking:  On  the Verge  of  a Breakthrough”; IEEE Computer, JULY 2013&lt;/li&gt;
+  &lt;li&gt;闵应骅；我所理解的“软件定义的网络” [J]；国际IT传媒品牌；2014年&lt;/li&gt;
+  &lt;li&gt;吴强等；基于 SDN 技术的数据中心基础网络构建[J]；电信科学，2013 年&lt;/li&gt;
+  &lt;li&gt;赵慧玲等；SDN—未来网络演进的重要趋势[J]；电信科学，2012 年&lt;/li&gt;
+  &lt;li&gt;吕高锋等；LabelCast:一种普适的SDN转发平面抽象[J]；计算机学报,2012年&lt;/li&gt;
+  &lt;li&gt;王云岚等；基于DNS的负载均衡算法研究[J]；计算机工程与应用；2002&lt;/li&gt;
+  &lt;li&gt;邵壮丰等；广东IPTV业务服务质量提升研究[J]；电信科学；2012&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        <pubDate>Tue, 23 Dec 2014 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2014/12/23/%E5%9F%BA%E4%BA%8ESDN%E6%80%9D%E6%83%B3%E7%9A%84OTT-CDN%E5%86%85%E5%AE%B9%E5%88%86%E5%8F%91%E5%92%8C%E4%B8%9A%E5%8A%A1%E8%B0%83%E5%BA%A6%E4%BC%98%E5%8C%96/</link>
+        <guid isPermaLink="true">http://localhost:4000/2014/12/23/%E5%9F%BA%E4%BA%8ESDN%E6%80%9D%E6%83%B3%E7%9A%84OTT-CDN%E5%86%85%E5%AE%B9%E5%88%86%E5%8F%91%E5%92%8C%E4%B8%9A%E5%8A%A1%E8%B0%83%E5%BA%A6%E4%BC%98%E5%8C%96/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术</category>
+        
+        <category>SDN</category>
+        
+        <category>原创</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>IPTV的网络安全防护策略研究</title>
+        <description>&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;摘要&lt;/code&gt;：&lt;/p&gt;
+
+&lt;p&gt;最近安全新媒体《安全客》发布&lt;a href=&quot;http://anquan.360.cn/news/detail/3843.html&quot;&gt;2016年全球十大网络安全事件&lt;/a&gt;，排在第二&lt;code class=&quot;highlighter-rouge&quot;&gt;德国90万家庭断网遭黑客蓄意入侵&lt;/code&gt;和第四的&lt;code class=&quot;highlighter-rouge&quot;&gt;美国遭史上最大规模DDoS攻击、东海岸网站集体瘫痪&lt;/code&gt;两起安全事件，均是用户侧的终端被入侵，这一次次警醒我们要做好IPTV的网络安全保障。&lt;/p&gt;
+
+&lt;p&gt;本文分析了IPTV业务系统面临的网络安全TOP威胁和自身的脆弱性，提出了针对性的IPTV系统网络安全防护策略，并把细化策略措施在G省的IPTV平台现网网络中加以实践，验证了策略的有效性，保障了G省的IPTV业务系统的网络安全，为业务发展和用户业务体验保驾护航。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;关键字&lt;/code&gt;：IPTV CDN 网络安全 防护策略&lt;/p&gt;
+
+&lt;h3 id=&quot;1-iptv系统面临的top网络安全威胁&quot;&gt;1 IPTV系统面临的TOP网络安全威胁&lt;/h3&gt;
+&lt;p&gt;国内运营商IPTV业务系统通常部署在独立的物理专网或逻辑专网（使用公网IP，但路由上通过ACL访问策略隔离）上，向省内电信用户提供IPTV视频服务。近几年业界OTT发展迅速，电信要实现向用户提供OTT业务（例如提供多屏业务、向公网开放IPTV业务等），可选择新建开放的OTT平台，或可直接把原有的专网IPTV平台改造演进为开放的IPTV平台，显然后者的投资成本更小、建设周期更短，因此当前已有多省改造演进原有的IPTV平台为开放的IPTV平台，实现了同时融合提供OTT和IPTV业务。&lt;/p&gt;
+
+&lt;p&gt;然而，当下开放的IPTV的平台面临着诸多严峻的网络安全风险，根据维护经验，IPTV面临的TOP3网络安全风险为：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;第一，平台设备和终端机顶盒被入侵控制成为肉鸡，被黑产利用对外进行DDOS流量攻击。这是因为IPTV平台中CDN节点、服务器数量多，设备性能高、出口带宽大，一省的CDN设备量通常有数千台、出口总带宽达到T bit级，每台CDN设备网卡带宽通常是1G以上，甚至可达10G，因此即使控制少量几台，对目标IP发起DDOS攻击，很容易产生数G甚至上百G的DDOS攻击流量，攻击能取得到立竿见影的效果，因此IPTV的主机是黑产眼中最理想的肥肉鸡。例如，在图1中，通过异常流量监控系统NTG监控显示，2013年Z市IPTV有4台主机被控为肉鸡，在凌晨0点至6点间发起对外DDOS攻击，攻击流量约2.5G/s，DDOS除了会造成被攻击目标瘫痪外，也会消耗受控主机的CPU和上行链路带宽，影响受控机上正常业务。
+&lt;img src=&quot;/img/IptvSecurity/p1.png&quot; alt=&quot;p1&quot; /&gt;
+图1 NTG监控系统发现IPTV有主机对外发起DDOS攻击&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;第二，篡改EPG和节目内容。IPTV的开放化，则内容服务器更多的暴露在公共互联网上，恶意的入侵，可能会篡改IPTV的EPG页面、节目内容或海报图片等，如果内容被恶意篡改为涉黄、反动等内容，会对电信IPTV品牌和业务造成信任危机，同时会带来政治、法律上的风险。2014年8月1日19点至次日凌晨6点，W市的网络电视平台遭到黑客入侵，EPG被篡改并出现大量政治敏感内容，影响50万用户，如图2，这再次为我们的IPTV业务运营和运行敲响警钟。
+&lt;img src=&quot;/img/IptvSecurity/p2.png&quot; alt=&quot;p2&quot; /&gt;
+图2 W市网络电视平台被入侵、内容被篡改&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;第三，节目内容盗播。早期IPTV平台厂家开发的系统多部署在专网内，未过多考虑视频防盗链功能，即使后来平台侧也开发了新版本支持防盗链，但由于早期生产的终端机顶盒性能低、软件版本已EOS很难升级到兼容防盗链功能，为兼容这部分终端，目前多省的IPTV平台，仍然面临无法支持节目内容防盗链功能，因此只要抓取机顶盒访问的视频URL，把URL经过简单编辑就可搭建外挂EPG，直接调用运营商CDN上的视频资源播放，淘宝上已有各种渠道流出或国内各省窜货的盒子，采用这种盗播方式在销售，见图3。恶意者搭建简易EPG，如图4，不仅盗取了电信运营商IPTVCDN计算资源进行视频播放，可能会导致运营商CDN服务能力下降或瘫痪，例如2013年H省的某CDN节点下流媒体服务器视频流并发负荷大常导致链路拥塞，经查是有很多外部的视频盗链，如图5。并且恶意者盗用EPG，可能会在EPG中融入涉黄内容，而销售给用户的终端是各种渠道流出的电信运营商的IPTV终端，终端上仍然有运营商的LOGO，这很容易被误认为是运营商的IPTV存在涉黄等信息安全风险。
+&lt;img src=&quot;/img/IptvSecurity/p3.png&quot; alt=&quot;p3&quot; /&gt;
+图3 淘宝上销售的IPTV盗播盒子
+&lt;img src=&quot;/img/IptvSecurity/p4.png&quot; alt=&quot;p4&quot; /&gt;
+图4 自搭建EPG运营
+&lt;img src=&quot;/img/IptvSecurity/p5.png&quot; alt=&quot;p5&quot; /&gt;
+图5 某省IPTV节目链接被盗取&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;入侵和盗取内部数据方面，S市T运营商拥有庞大的网络电视用户，模拟黑客通过其EPG中的IP设置选项，把接机顶盒的网线插入PC后，PC能获取到IP等信息，之后利用漏洞和弱口令扫描器进行爆破渗透，可渗透到内网盗取内部信息，盗取到了很多内部数据，如图6。
+&lt;img src=&quot;/img/IptvSecurity/p6.png&quot; alt=&quot;p6&quot; /&gt; 
+图6 S市T运营商网络电视平台被入侵内部数据被盗取&lt;/p&gt;
+
+&lt;h3 id=&quot;2-iptv系统的脆弱性&quot;&gt;2 IPTV系统的脆弱性&lt;/h3&gt;
+
+&lt;p&gt;随着IPTV系统逐步走向公网开放，前述的分析显示，IPTV所面临的TOP3网络安全风险，无论是控制肉鸡发起DDOS攻击、篡改EPG或节目内容、还是盗取内部数据，其实现途径都是入侵到IPTV系统内部服务器，因此我们需要分析IPTV系统自身的脆弱性，研究恶意者入侵的方法，进而针对性地设计和实施对应的安全防护举措。&lt;/p&gt;
+
+&lt;p&gt;从维护经验看，访问控制策略缺失或不当、口令泄漏、系统和服务漏洞、重要基线项无配置或配置不当，是IPTV的主要脆弱性，也是导致被入侵的主要原因。&lt;/p&gt;
+
+&lt;p&gt;在网络访问控制策略方面，IPTV的CDN节点，除了向公网开放访问，上下级之间CDN节点还需要互访进行内容分发、业务管理和设备管理，这意味着IPTV系统的网络安全域范围较大，且一个CDN节点内部的主机，一般是一个局域网，主机之间路由可达，如果发生一台主机被入侵，则黑客通常会通过这台肉鸡做跳板，采用NMAP等扫描工具，对内网、对相近IP网段进行批量扫描，踩点找到更多的存活和存在特定的高危端口（如22、21、23、8899、1521、3306等）的主机，进而采用破解工具进行密码爆破，另外由于IPTV系统设备量巨大，对同类设备，管理员常对某个账号设置相同的密码，因此只要有一台被攻破，通常会有一批主机也跟着沦陷。因此需要在可维性和安全性之间找到一个平衡点，设置合理的网络安全访问策略来减小IPTV平台在互联网的暴露度以提升系统安全性。&lt;/p&gt;
+
+&lt;p&gt;口令的泄漏方面。随着维护人员的安全意识提高和安全技术和管理手段健全，系统出现弱口令的几率在下降，但维护经验发现，黑客收集的密码字典和所要渗透的业务平台越来越有针对性，呈现出密码字段精简（图7）、或从被入侵主机的history、messages、passwd和各种系统或业务config文件中分析、攫取可能的密码加入到字典中。例如国内电信各种业务平台软硬，主要由HW、ZTE等主要电信设备厂家提供，厂家的设备存有各种默认的账号密码，例如，hwadmin:hwadmin、zte:zte，由于系统交付没及修改默认口令，导致G市DCN网多台有该账号密码的设备被渗透控制；又如，由于厂家或电信管理员，编写Shell脚本对设备进行辅助监控或日常维护，可能Shell配置文件中含有账号密码，或管理员对一批设备定期批量修改账号密码，由于设备数量多，可能会采用脚本的方式修改，则可能会在history中留下了明文的修改后的密码痕迹未及时擦除等，只要黑客突破某台主机就能很容易翻查出这些密码信息或者安装上后门软件捕抓到管理员修改账号的密码；又如，互联网上如百度文库，有大量的电信各种相关业务系统、厂家设备的培训、介绍文档，里面包含了账号密码等敏感信息，黑客也能搜索到并加入到密码字典中进行爆破。
+&lt;img src=&quot;/img/IptvSecurity/p7.png&quot; alt=&quot;p7&quot; /&gt;   &lt;br /&gt;
+图7 黑客的密码字典有针对性   &lt;br /&gt;
+&lt;img src=&quot;/img/IptvSecurity/p8.png&quot; alt=&quot;p8&quot; /&gt;
+图8 百度搜索到电信含账号密码的各种文档&lt;/p&gt;
+
+&lt;p&gt;系统和服务漏洞方面，IPTV平台通常由业务能力服务层（如视频流服务、EPG服务）、业务控制层（调度、认证鉴权）、业务管理层（业务、用户、产品数据管理）、业务支撑层（内容分发、网管、报表等）以及衍生的各种其他子系统组成，系统功能模块众多架构复杂规模庞大，因此各种功能模块的中间件、应用软件可能由于版本低，没有及时升级，存在漏洞，例如SUSE10SP2及以前版本存在提权漏洞，OpenSSH、Jboss、Tomcat、Strus2、Oracle等低版本的中间件存在可远程执行代码、重定向攻击、溢出攻击、信息泄漏、跨站等众多高危漏洞，厂家开发的应用软件也存在各种漏洞，如HW厂家开发的iDeploy软件部署工具存在上传漏洞，黑客利用该漏洞上传后门木马可控制主机。&lt;/p&gt;
+
+&lt;p&gt;在重要基线项无配置或配置方面，电信集团公司［2011］555号文和［2014］528号文，规定了操作系统和主要第三方软件的基线配置规范，但在现网中，难以所有设备百分百按基线规范配置，例如由于历史原因某些应用服务直接运行在root下，无法一刀切限制root远程登录；又或者由于工程建设期安全措施滞后或日常管理的不当，可能导致设备未及时配置输入错误超过阀值次数锁定等基线项，导致了入侵者只要突破了一台设备，就可以大概率地在相同或临近网段发起密码猜解爆破行为。&lt;/p&gt;
+
+&lt;h3 id=&quot;3-iptv网络安全防护策略设计&quot;&gt;3 IPTV网络安全防护策略设计&lt;/h3&gt;
+
+&lt;p&gt;最大化减小IPTV面临的TOP3风险，就是要做好访问控制策略配置、防范口令泄漏、修补存留漏洞和严格落实基线配置，而其中重中之重，就是要设计和实施合理的访问控制策略，这是因为访问控制策略是系统的大门，完善的访问控制策略可以在一定程度上弥补其他安全措施不当或缺失带来的脆弱性。而访问控制策略，需要结合业务需求，基于IPTV现状，我们设计了G省的IPTV网络访问控制策略如下，这也是对集团关于业务平台安全域划分策略在现网的应用实践。&lt;/p&gt;
+
+&lt;p&gt;IPTV平台由多级CDN节点组成，各级CDN节点通常对接城域网或骨干网核心路由设备，而用户终端通过OTT网络域拨号或共享家庭AD宽带网络接入访问各级CDN节点，如图9所示，C区的用户通过B区接入承载网络访问A区的IPTV CDN资源，可见A区的平台服务器和C区的终端都暴露在开放的互联网上，因此需要从IPTV平台的出口网络边界上，实施合适的访问控制策略，达到在满足最小化的业务运行需求的同时最小化平台的暴露，从而减少面临安全风险。&lt;/p&gt;
+
+&lt;p&gt;在IPTV的CDN节点内部，通常由出口交换机、防火墙、主机操作系统以及其上的应用服务组成，CDN上下级节点之间需要互访实现内容在整个CDN网内之间的分发。如图10所示，CDN节点出口网络交换机和防火墙，可通过配置网络层的访问控制列表ACL来匹配外部网络对CDN必要的访问需求，达到阻挡非受信外部网络访问，起到保护CDN内部网络的目的；而CDN内部服务器操作系统内置的iptables防火墙、tcpwrap(hostsallow|deny)列表可配置网络层和传输层的更细颗粒度访问控制策略，如允许CDN内部指定IP或协议的互访，达到规避CDN出口网络策略被突破后CDN内部服务器之间的相互入侵风险；服务器上应用服务自身也有访问控制策略，如SSH、FTP等服务，可通过配置应用层的白名单，限制非法请求，达到即使网络策略和主机操作系统防护策略失效后，应用服务自身还有最后一道安全防线。
+&lt;img src=&quot;/img/IptvSecurity/p9.png&quot; alt=&quot;p9&quot; /&gt;       &lt;br /&gt;
+图9 IPTV系统在网络中的位置
+&lt;img src=&quot;/img/IptvSecurity/p10.png&quot; alt=&quot;p10&quot; /&gt;
+图10 IPTV系统内部边界&lt;/p&gt;
+
+&lt;h3 id=&quot;4-g省iptv网络安全防护策略实践&quot;&gt;4 G省IPTV网络安全防护策略实践&lt;/h3&gt;
+
+&lt;p&gt;根据1和2的分析，我们提出了3中的IPTV网络安全防护策略，从2013年以来，我们把这套策略在G省的IPTV平台上进行了实践，具体实践的措施包括如下：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;IPTV安全项目&lt;/th&gt;
+      &lt;th&gt;IPTV设备类型&lt;/th&gt;
+      &lt;th&gt;采取的安全措施&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;访问控制策略&lt;/td&gt;
+      &lt;td&gt;网络设备&lt;/td&gt;
+      &lt;td&gt;（1）筑起防线，实现本地平台只向本地网IP开放，最小化本地网平台的暴露度，降低被攻击和节目导播的风险；（2）最小化系统运行和运维需要的SSH和FTP等协议的互访需求，降低系统暴露度；（3）出方向限制IP，大大降低了平台对外DDOS攻击的价值，即使平台被入侵，也失去了DDOS的价值。&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;访问控制策略&lt;/td&gt;
+      &lt;td&gt;服务器&lt;/td&gt;
+      &lt;td&gt;主机本身再筑防线，从传输层和应用层上增强访问安全控制，降低CDN节点内部网络被突破后，渗透在平台内部扩散的风险。&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;基线配置&lt;/td&gt;
+      &lt;td&gt;所有&lt;/td&gt;
+      &lt;td&gt;解决基线配置不规范，厂家部分设备不支持或业务需求原因无法实现基线配置需求，存在安全隐患容易被攻击入侵的风险&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;漏洞修补&lt;/td&gt;
+      &lt;td&gt;所有&lt;/td&gt;
+      &lt;td&gt;作系统、第三方软件、应用软件存在多种中高危漏洞，需要修复&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;安全维护&lt;/td&gt;
+      &lt;td&gt;所有&lt;/td&gt;
+      &lt;td&gt;完善安全手段和工具，提升安全监控和维护的效率和成效&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;采取上述措施后，我省IPTV平台网络安全防护效果较明显，例如SOC日志监控显示，每天IPTV网络交换机和防火墙，都拦截了大量的各种网络扫描和攻击；实施访问控制策略后，IPTV系统也未再发生主机被劫持对外发起DDOS流量攻击；IPTV平台的漏洞数量也从2013年的3000多个下降到了当前的个位数；同时，我们还在IPTV内部部署了蜜罐系统和日志审计系统，辅助监测异常入侵事件。&lt;/p&gt;
+
+&lt;h3 id=&quot;5-iptv网络安全展望&quot;&gt;5 IPTV网络安全展望&lt;/h3&gt;
+
+&lt;p&gt;IPTV/OTT系统面向互联网开放，面临的网络安全威胁繁多，且由于平台架构复杂、设备规模庞大、业务需求复杂，自身脆弱性较多，综合面临的风险较高，除了采取本文提到的技术层面的安全防护策略，仍有许多需要探索和完善，如终端安全等，同时一定要有合理的网络安全组织架构、匹配的安全运维力量和安全管理机制，并在生产实践中不断地试错和完善，形成贯穿从系统的扩容规划、建设、投产和退网全生命周期的网络安全防护体系，才能游刃地应对严峻的网络安全形势和挑战。&lt;/p&gt;
+</description>
+        <pubDate>Mon, 23 Dec 2013 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2013/12/23/IPTV%E7%9A%84%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E7%AD%96%E7%95%A5%E7%A0%94%E7%A9%B6/</link>
+        <guid isPermaLink="true">http://localhost:4000/2013/12/23/IPTV%E7%9A%84%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E7%AD%96%E7%95%A5%E7%A0%94%E7%A9%B6/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术</category>
+        
+        <category>网络安全</category>
+        
+        <category>原创</category>
+        
+        
+      </item>
+    
   </channel>
 </rss>

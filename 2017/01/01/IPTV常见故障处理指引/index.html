@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="邵壮丰的博客：关于IPTV技术工作的点滴记录，和兴趣的技术分享。专注、关注的技术主要包括IPTV、OTT、CDN、机器学习、模式识别、WEB和移动前端全栈、大数据、网络安全。">
+    <meta name="keywords"  content="邵壮丰,zfshao,xyzszf,邵壮丰博客,Blog,IPTV,OTT,CDN,机器学习,前端,全栈,大数据,网络安全">
+    <meta name="theme-color" content="#000000">
+    
+    <title>[原创]IPTV常见故障处理指引 - 邵壮丰的博客 | zfshao Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2017/01/01/IPTV%E5%B8%B8%E8%A7%81%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%BC%95/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!--  change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!--  Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">zfshao</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-earth.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-earth.jpg')
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.3);
+    }
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#IPTV" title="IPTV">IPTV</a>
+                        
+                        <a class="tag" href="/tags/#技术发展" title="技术发展">技术发展</a>
+                        
+                        <a class="tag" href="/tags/#原创" title="原创">原创</a>
+                        
+                    </div>
+                    <h1>[原创]IPTV常见故障处理指引</h1>
+                    
+                    
+                    <h2 class="subheading">你也可以成为IPTV故障处理专家</h2>
+                    
+                    <span class="meta">Posted by 邵壮丰 on January 1, 2017</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p><strong><code class="highlighter-rouge">这个专题，我把IPTV运维工作相关的方法、工具、培训材料以Wiki方式归纳统一呈现，方便童鞋们学习参考。同时，如果你有什么好的资料希望共享，请发给我；如果你对这个Wiki建设有什么好的想法，请告诉我；如果你特别希望在Wiki中增加什么内容，也可告诉我。联系方式：OA邮箱</code></strong></p>
+
+<p><code class="highlighter-rouge">注：下面可能部分资料阅读需要解压密码，请咨询市公司IPTV维护同事</code></p>
+
+<h3 id="1iptv故障处理思路">1.IPTV故障处理思路</h3>
+
+<p>IPTV业务，从头到脚基本上电信运营商提供服务，除了SP提供的节目源之外，从顶级CDN、区域CDN和边缘CDN、管理平台、骨干网络、城域网网络、接入网络、猫和机顶盒，是运营商各种业务中涉及流程最长环节最多的业务。客观的说，IPTV业务的复杂度远超过4G、宽带等基础业务，这也直接决定了IPTV的故障处理难度相对其他业务更加复杂、处理难度更大，对维护人员知识技能要求更高，很多维护人员很害怕处理IPTV故障。但不管IPTV故障处理难度多大，归纳起来故障现象和可能愿意无非是如下8类：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">序</th>
+      <th style="text-align: center">故障现象</th>
+      <th style="text-align: left">可能原因</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">1</td>
+      <td style="text-align: center">开机接入不了</td>
+      <td style="text-align: left">（1）数据：用户账号数据在后台系统不一致，个别故障居多 <br />（2）网络：网络不通，机顶盒无非认证，个别或局部故障 <br />（3）平台：IPTV系统故障，特别是会引起大规模同类故障 <br />（4）机顶盒：机顶盒版本BUG，多在升级后出现，可能会集中于某种型号机顶盒</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">2</td>
+      <td style="text-align: center">视频播放卡顿、马赛克</td>
+      <td style="text-align: left">（1）外部网络：视频数据丢包，可能是承载网络拥塞、链路误码、网络设备故障、网络设备数据配置不合理导致，局部故障，此类原因居多 <br />（2）家庭网络：内部线路、路由器问题，个案 <br />（3）平台：CDN流媒体服务器负载过重，或设备故障，局部故障 <br />（4）节目源：SP提供的节目源有问题，大面积有相同故障 <br />（5）速率：账号速率不达标，个案 <br />（6）机顶盒：机顶盒版本BUG，多在升级后出现，可能会集中于某种型号机顶盒</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">视频播放黑屏</td>
+      <td style="text-align: left">（1）网络：路由不通，或严重丢包，居多；有时提示10088等错误代码提示 <br />（2）平台：CDN设备容量完全满了，无非提供服务，概率较少；有时提示RTSP404代码</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">4</td>
+      <td style="text-align: center">视频播放过程提示错误代码</td>
+      <td style="text-align: left">同2，丢包严重时会抛出错误代码，如果EPG模版有对错误代码进行提示，则会有错误代码提示，若无提示，则现象也同2和3</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">5</td>
+      <td style="text-align: center">EPG操作响应慢</td>
+      <td style="text-align: left">（1）机顶盒：老旧低配置机顶盒居多，机顶盒性能不够满足不了EPG页面的渲染计算和内存需求，特别是早起的普通标清、高清机顶盒，需要更换为性能更高的4K智能机顶盒 <br />（2）平台：EPG模版逻辑异常或加载的其他资源无非正常加载；或EPG服务器符合性能不足</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">EPG提示错误代码</td>
+      <td style="text-align: left">（1）参考<a href="/img/IptvTroubleshoot/docx/IptvErrorcode2.0.xlsx">《广东IPTV错误代码V2.0》</a><br />（2）主要错误代码：HTTP 500，EPG模版或EPG容器问题故障；10071，机顶盒访问EPG页面响应超时，可能是路由不通或者EPG服务器故障无响应</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">7</td>
+      <td style="text-align: center">机顶盒/遥控器其他问题</td>
+      <td style="text-align: left">（1）机顶盒：机顶盒软件或硬件故障，个案 <br />（2）遥控器控制不了：电气干扰等</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">8</td>
+      <td style="text-align: center">费用争议</td>
+      <td style="text-align: left">（1）IPTV上的增值付费节目较多，可能家庭中其他人购买了增值服务业务但缴费人不知，可通过查询日志记录确认 <br />（2）话单生成系统、计费系统故障导致出账异常<br />（3）其他恶意订购</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>每类问题的故障原因可能多种多样，相同的症状可能是由不同的病因引起，需要对症下药，但处理的思路不外乎：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">对比拨测</code>：问问隔壁老王家的IPTV是否正常，看看不同OLT/BAS/BR下的用户是否正常</li>
+  <li><code class="highlighter-rouge">逐段排查</code>：参照上表，查数据、查网络、查平台、查终端、查电视台节目源，顺藤摸瓜查；故障处理过程可能有一点小难度，实在搞不定的，可下载<a href="/img/IptvTroubleshoot/docx/IptvTroubleshoot.rar">《IPTV故障处理指引》</a> 参考，多处理几单你就是高手了（只会报障不会处理是不行的^_^）</li>
+</ul>
+
+<h3 id="2iptv故障处理指引">2.IPTV故障处理指引</h3>
+
+<p>作为IPTV维护专家，不管哪一类故障，我们总是需要有办法来解决故障，让用户放心地使用我们IPTV业务。下面IPTV故障处理的指引，值得仔细一读，结合实践不断提升自己的IPTV故障处理技能：</p>
+
+<ul>
+  <li><a href="/img/IptvTroubleshoot/docx/IptvTroubleshoot.rar">《IPTV故障处理指引》</a></li>
+  <li><a href="/img/IptvTroubleshoot/docx/IptvErrorcode2.0.xlsx">《广东IPTV错误代码V2.0》</a>，可查询常见错误代码及其可能原因和处理建议。</li>
+  <li><a href="/img/IptvTroubleshoot/docx/IptvMac.png">《IPTV机顶盒MAC地址对应表》</a>，可查询IPTV机顶盒与MAC地址对应关系，在处理故障时帮助判断机顶盒属于哪个厂家的。</li>
+  <li>同时建议你关注<code class="highlighter-rouge">广东IPTV自助服务</code>微信公众号：<strong><code class="highlighter-rouge">gdiptvss</code></strong>，可更便捷查询一些常见故障处理指引。</li>
+</ul>
+
+<h3 id="3iptv故障案例">3.IPTV故障案例</h3>
+<p>省市分享的一些故障案例，值得参考学习。同时特别感谢分享这些故障案例的童鞋们，在案例中我们也保留的原作者的姓名。我们提倡分享精神，如果你有好的经验案例，请发给我们放到Wiki上。</p>
+
+<ul>
+  <li><a href="/img/IptvTroubleshoot/docx/IptvCase@2015.rar">2015年IPTV故障案例</a></li>
+  <li><a href="/img/IptvTroubleshoot/docx/IptvCase@2016.rar">2016年IPTV故障案例</a></li>
+</ul>
+
+<h3 id="4iptv其他培训参考资料">4.IPTV其他培训、参考资料</h3>
+
+<p>更多IPTV（也称天翼高清）培训材料，可参考广东电信<strong><code class="highlighter-rouge">知识云</code></strong>（由于是DCN地址，这里就不给链接了），搜索<code class="highlighter-rouge">天翼高清</code>或<code class="highlighter-rouge">IPTV</code>或<code class="highlighter-rouge">邵壮丰</code>关键字。</p>
+
+<h3 id="5-iptv运维工具">5. IPTV运维工具</h3>
+
+<p>IPTV涉及端管云多环节，不同维护场景有不同的维护工具系统，因此本节会把IPTV日常运行维护工作涉及的工具系统做一个小结介绍：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">序号</th>
+      <th style="text-align: center">工具名称</th>
+      <th style="text-align: center">主要功能</th>
+      <th style="text-align: center">使用对象</th>
+      <th style="text-align: center">使用场景</th>
+      <th style="text-align: center">获取途径</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">1</td>
+      <td style="text-align: center">掌上综调（APP）</td>
+      <td style="text-align: center">查询IPTV用户数据、机顶盒解绑、密码重置等</td>
+      <td style="text-align: center">一线装维人员</td>
+      <td style="text-align: center">IPTV机顶盒装维</td>
+      <td style="text-align: center">分公司综调</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">2</td>
+      <td style="text-align: center">光宽端到端系统（APP、PC）</td>
+      <td style="text-align: center">光宽带、IPTV机顶盒视频播放卡顿马赛克等故障时进行诊断，这里嗮一张<a href="/img/IptvTroubleshoot/1/3.jpg">IPTV故障诊断例</a></td>
+      <td style="text-align: center">一线装维、二次处理、客服人员</td>
+      <td style="text-align: center">IPTV机顶盒故障处理</td>
+      <td style="text-align: center">分公司综、客调</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">局域网内机顶盒维护小工具STBmonitor（在PC上使用）</td>
+      <td style="text-align: center">用于局域网内或网络可达范围内连接机顶盒，对机顶盒进行配置、日志采集抓包</td>
+      <td style="text-align: center">一线装维资深技术专家、二线维护支撑人员</td>
+      <td style="text-align: center">IPTV机顶盒疑难故障处理</td>
+      <td style="text-align: center">省NOC</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">4</td>
+      <td style="text-align: center">IPTV质量监测系统SQM（在PC上使用）</td>
+      <td style="text-align: center">监测机顶盒播放质量数据，提供机顶盒视频播放记录数据的查询管理（光宽系统已调用SQM系统重要数据）</td>
+      <td style="text-align: center">二线维护支撑人员</td>
+      <td style="text-align: center">IPTV播放质量差诊断、IPTV运行质量监控</td>
+      <td style="text-align: center">省NOC</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">4</td>
+      <td style="text-align: center">IPTV其他专业网管</td>
+      <td style="text-align: center">对IPTV管理平台和全网CDN节点运行的运行管理、监控</td>
+      <td style="text-align: center">二线维护支撑人员</td>
+      <td style="text-align: center">IPTV运维监控</td>
+      <td style="text-align: center">省NOC</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="6其他">6.其他</h3>
+
+<ol>
+  <li>想测试一下你的IPTV技术知识么？这里有一份原创性试卷<a href="/img/IptvTroubleshoot/docx/IptvTest.pdf">《广东天翼高清专家人才考试试卷》</a>，值得尝试一下。</li>
+</ol>
+
+
+
+                <hr style="visibility: hidden;">
+
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/12/17/IPTV%E8%A7%86%E9%A2%91%E6%B8%85%E6%99%B0%E5%BA%A6-%E5%88%86%E8%BE%A8%E7%8E%87%E5%92%8C%E7%A0%81%E7%8E%87/" data-toggle="tooltip" data-placement="top" title="IPTV清晰度、分辨率和码率">
+                        Previous<br>
+                        <span>IPTV清晰度、分辨率和码率</span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#IPTV" title="IPTV" rel="7">
+                                    IPTV
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#技术" title="技术" rel="3">
+                                    技术
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#原创" title="原创" rel="7">
+                                    原创
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#技术发展" title="技术发展" rel="4">
+                                    技术发展
+                                </a>
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://shaozhuangfeng.github.io">Is Me</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/shaozhuangfeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; zfshao 2017
+                    <br>
+                    
+<!--                    Theme by <a href="http://zfshao.me">邵壮丰 Zfshao</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=xyzszf&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+-->                    
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'zfshao.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

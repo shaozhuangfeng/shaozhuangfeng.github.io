@@ -1,42 +1,671 @@
----
-layout: page
-description: "Technology sharing, about IPTV & ..."
----
+<!DOCTYPE html>
+<html lang="en">
 
-{% for post in paginator.posts %}
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="邵壮丰的博客：关于IPTV技术工作的点滴记录，和兴趣的技术分享。专注、关注的技术主要包括IPTV、OTT、CDN、机器学习、模式识别、WEB和移动前端全栈、大数据、网络安全。">
+    <meta name="keywords"  content="邵壮丰,zfshao,xyzszf,邵壮丰博客,Blog,IPTV,OTT,CDN,机器学习,前端,全栈,大数据,网络安全">
+    <meta name="theme-color" content="#000000">
+    
+    <title>邵壮丰的博客 | zfshao Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!--  change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!--  Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">zfshao</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>zfshao</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">Technology sharing, about IPTV & ...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+	<div class="row">
+        
+
+<!-- USE SIDEBAR -->
+    <!-- PostList Container -->
+    		<div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                postlist-container
+            ">
+    			
 <div class="post-preview">
-    <a href="{{ post.url | prepend: site.baseurl }}">
+    <a href="/2017/01/01/IPTV%E5%B8%B8%E8%A7%81%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%BC%95/">
         <h2 class="post-title">
-            {{ post.title }}
+            [原创]IPTV常见故障处理指引
         </h2>
-        {% if post.subtitle %}
+        
         <h3 class="post-subtitle">
-            {{ post.subtitle }}
+            你也可以成为IPTV故障处理专家
         </h3>
-        {% endif %}
+        
         <div class="post-content-preview">
-            {{ post.content | strip_html | truncate:200 }}
+            这个专题，我把IPTV运维工作相关的方法、工具、培训材料以Wiki方式归纳统一呈现，方便童鞋们学习参考。同时，如果你有什么好的资料希望共享，请发给我；如果你对这个Wiki建设有什么好的想法，请告诉我；如果你特别希望在Wiki中增加什么内容，也可告诉我。联系方式：OA邮箱
+
+注：下面可能部分资料阅读需要解压密码，请咨询市公司IPTV维护同事
+
+1.IPTV故障处理思路
+
+IPTV业务，从头到脚...
         </div>
     </a>
     <p class="post-meta">
-        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
+        Posted by 邵壮丰 on January 1, 2017
     </p>
 </div>
 <hr>
-{% endfor %}
+
+<div class="post-preview">
+    <a href="/2016/12/17/IPTV%E8%A7%86%E9%A2%91%E6%B8%85%E6%99%B0%E5%BA%A6-%E5%88%86%E8%BE%A8%E7%8E%87%E5%92%8C%E7%A0%81%E7%8E%87/">
+        <h2 class="post-title">
+            IPTV清晰度、分辨率和码率
+        </h2>
+        
+        <h3 class="post-subtitle">
+            IPTV视觉的盛宴
+        </h3>
+        
+        <div class="post-content-preview">
+            广东IPTV视频清晰度、分辨率和码率关系
+
+高清晰度、超高清晰度当然是视频演进的方向，当然对带宽需求也是越高。
+
+
+  
+    
+      清晰度
+      分辨率
+      码率
+    
+  
+  
+    
+      标清
+      720x480
+      2.5M
+    
+    
+      高清
+      1024x720P；1920x1080i；1920x1...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by zfshao on December 17, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/12/17/IPTV%E5%B9%B3%E5%8F%B0%E6%89%BF%E8%BD%BDOTT%E4%B8%9A%E5%8A%A1%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6/">
+        <h2 class="post-title">
+             IPTV平台承载OTT业务的关键技术研究
+        </h2>
+        
+        <h3 class="post-subtitle">
+            CDN智能调度、适应性码率和防盗链思考
+        </h3>
+        
+        <div class="post-content-preview">
+            摘要：
+
+本文分析OTT的业务开放性和网络无关性特征，提出终端接入和CDN部署适应网络无关性的技术方法，并提出采用CDN智能调度优化技术、ABR和VBR适应性码率、以及视频播放防盗链技术来解决IPTV平台升级为开放性和网络无关性平台可能面临的难题，为IPTV平台平滑升级为同时承载OTT与IPTV业务的融合富媒体平台提供了技术参考，避免为发展OTT业务需重新建设独立OTT平台进行重复投资。
+
+...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by 邵壮丰 on December 17, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/11/20/%E5%B9%BF%E4%B8%9CIPTV%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E5%8F%8A%E4%B8%8B%E4%B8%80%E9%98%B6%E6%AE%B5%E6%96%B9%E5%90%91/">
+        <h2 class="post-title">
+            广东IPTV技术发展历程及下一阶段方向
+        </h2>
+        
+        <h3 class="post-subtitle">
+            IPTV技术演进思考
+        </h3>
+        
+        <div class="post-content-preview">
+            本文简要回顾广东IPTV发展历程，思考下个阶段IPTV规模发展的技术方向。
+
+广东电信推出了IPTV业务已有近10年时间，IPTV业务发展至今已近 700万用户 。10年坎坷路走过三个阶段，而今迎来发展新阶段：
+
+
+第一阶段，2007年至2008年，起点
+在第一阶段，我们把IPTV业务搭建起来了，开始试点发展用户，也走在全国的前列（当时福建IPTV在国内发展最好）。在这个阶段，国内IPTV产...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by zfshao on November 20, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2014/12/23/IPTV%E7%BD%91%E7%BB%9C%E8%BF%90%E8%90%A5%E7%AB%AF%E5%88%B0%E7%AB%AF%E8%B4%A8%E9%87%8F%E4%BF%9D%E9%9A%9C%E4%BD%93%E7%B3%BB%E7%A0%94%E7%A9%B6/">
+        <h2 class="post-title">
+            [原]IPTV网络运营端到端质量保障体系研究
+        </h2>
+        
+        <h3 class="post-subtitle">
+            全生命周期保障IPTV质量
+        </h3>
+        
+        <div class="post-content-preview">
+            
+摘 要
+
+本文从天翼高清（下简称IPTV）业务生命周期的视角，研究IPTV业务受理、安装和使用三个阶段存在的痛点，并为每个阶段设计了相应的保障方案，系统性地提出了IPTV端到端网络运营质量保障体系框架，并在广东电信IPTV实际生产环境中对标此保障体系进行实践，取得了较好成效，为广东近600万用户使用IPTV业务提供了保障。
+
+关键词
+
+IPTV 网络运营质量 端到端 质量保障
+
+1 引言
+...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by 邵壮丰 on December 23, 2014
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2014/12/23/%E5%9F%BA%E4%BA%8ESDN%E6%80%9D%E6%83%B3%E7%9A%84OTT-CDN%E5%86%85%E5%AE%B9%E5%88%86%E5%8F%91%E5%92%8C%E4%B8%9A%E5%8A%A1%E8%B0%83%E5%BA%A6%E4%BC%98%E5%8C%96/">
+        <h2 class="post-title">
+            基于SDN思想的OTT CDN内容分发和业务调度优化
+        </h2>
+        
+        <h3 class="post-subtitle">
+            SDN不一定要生搬硬套，思想可借鉴
+        </h3>
+        
+        <div class="post-content-preview">
+            摘要：
+
+本文分析SDN技术特点和优势，提出基于SDN的CDN内容分发和业务调度优化方案，通过SDN思想与传统CDN的结合，构建新的内容分发控制平面，获得OTT全网拓扑数据，实现OTT内容的最优化和接口自动部署，节约带宽资源和提高分发效率；提出在OTT调度控制平面中增加CDN节点级负载和服务质量两个指标，实现对边缘节点的过载保护机制，提升终端用户业务调度灵活性和业务服务质量。
+
+关键词:
+
+...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by 邵壮丰 on December 23, 2014
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2013/12/23/IPTV%E7%9A%84%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E7%AD%96%E7%95%A5%E7%A0%94%E7%A9%B6/">
+        <h2 class="post-title">
+            IPTV的网络安全防护策略研究
+        </h2>
+        
+        <h3 class="post-subtitle">
+            网络安全，一个永恒的话题
+        </h3>
+        
+        <div class="post-content-preview">
+            摘要：
+
+最近安全新媒体《安全客》发布2016年全球十大网络安全事件，排在第二德国90万家庭断网遭黑客蓄意入侵和第四的美国遭史上最大规模DDoS攻击、东海岸网站集体瘫痪两起安全事件，均是用户侧的终端被入侵，这一次次警醒我们要做好IPTV的网络安全保障。
+
+本文分析了IPTV业务系统面临的网络安全TOP威胁和自身的脆弱性，提出了针对性的IPTV系统网络安全防护策略，并把细化策略措施在G省的IP...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by 邵壮丰 on December 23, 2013
+    </p>
+</div>
+<hr>
+
 
 <!-- Pager -->
-{% if paginator.total_pages > 1 %}
-<ul class="pager">
-    {% if paginator.previous_page %}
-    <li class="previous">
-        <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
-    </li>
-    {% endif %}
-    {% if paginator.next_page %}
-    <li class="next">
-        <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
-    </li>
-    {% endif %}
-</ul>
-{% endif %}
+
+
+    		</div>
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-3 col-lg-offset-0
+                col-md-3 col-md-offset-0
+                col-sm-12
+                col-xs-12
+                sidebar-container
+            ">
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                            
+                                <a href="/tags/#IPTV" title="IPTV" rel="7">
+                                    IPTV
+                                </a>
+                            
+                        
+                            
+                                <a href="/tags/#技术" title="技术" rel="3">
+                                    技术
+                                </a>
+                            
+                        
+                            
+                        
+                            
+                                <a href="/tags/#原创" title="原创" rel="7">
+                                    原创
+                                </a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                                <a href="/tags/#技术发展" title="技术发展" rel="4">
+                                    技术发展
+                                </a>
+                            
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Short About -->
+                <section class="visible-md visible-lg">
+                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
+                    <div class="short-about">
+                        
+                            <img src="/img/avatar-zfshao.jpg" />
+                        
+                        
+                            <p>关于IPTV/OTT/CDN、机器学习、WEB和移动前端全栈、大数据、网络安全技术工作点滴记录和分享！</p>
+                        
+                        <!-- SNS Link -->
+                        <ul class="list-inline">
+                            
+                            
+                            
+                            <li>
+                                <a target="_blank" href="https://www.zhihu.com/people/zfshao">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa  fa-stack-1x fa-inverse">知</i>
+                                    </span>
+                                </a>
+                            </li>
+                            
+                            
+                            <li>
+                                <a target="_blank" href="http://weibo.com/zfshao">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                            
+                            
+                            
+                            <li>
+                                <a target="_blank" href="https://github.com/shaozhuangfeng">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                            
+                            
+                        </ul>
+                    </div>
+                </section>
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://shaozhuangfeng.github.io">Is Me</a></li>
+                    
+                </ul>
+                
+    		</div>
+        
+	</div>
+</div>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/shaozhuangfeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; zfshao 2017
+                    <br>
+                    
+<!--                    Theme by <a href="http://zfshao.me">邵壮丰 Zfshao</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=xyzszf&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+-->                    
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'zfshao.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
