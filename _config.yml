@@ -70,7 +70,7 @@ ga_domain: zfshao.me
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "关于IPTV/OTT/CDN、机器学习/模式识别、WEB和移动前端全栈、大数据、网络安全技术工作点滴记录和分享！"
+sidebar-about-description: "关于IPTV/OTT/CDN、机器学习、WEB和移动前端全栈、大数据、网络安全技术工作点滴记录和分享！"
 sidebar-avatar: /img/avatar-zfshao.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
