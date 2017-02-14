@@ -5,9 +5,161 @@
     <description>邵壮丰的博客：关于IPTV技术工作的点滴记录，和兴趣的技术分享。专注、关注的技术主要包括IPTV、OTT、CDN、机器学习、模式识别、WEB和移动前端全栈、大数据、网络安全。</description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 25 Jan 2017 16:57:53 +0800</pubDate>
-    <lastBuildDate>Wed, 25 Jan 2017 16:57:53 +0800</lastBuildDate>
+    <pubDate>Tue, 14 Feb 2017 15:49:33 +0800</pubDate>
+    <lastBuildDate>Tue, 14 Feb 2017 15:49:33 +0800</lastBuildDate>
     <generator>Jekyll v3.3.1</generator>
+    
+      <item>
+        <title>为何推荐IPTV机顶盒采用PPPoE/IPoE拨号方式观看视频</title>
+        <description>&lt;p&gt;&lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;电信IPTV一线装维工程师，在给用户安装IPTV机顶盒时，会困惑到底要给机顶盒采用哪种网络接入方式，是采用拨号方式呢？还是采用Wifi方式？这篇文章，将解答这个困惑。因此，这片文章特别适合IPTV一线装维人员、用户阅读：&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;1机顶盒支持的网络接入模式&quot;&gt;1.机顶盒支持的网络接入模式&lt;/h3&gt;
+&lt;p&gt;IPTV机顶盒，分“功能型”机顶盒、“智能型”和“融合型”机顶盒，功能型指机顶盒操作系统是linux系统的普通标清和普通高清机顶盒，“智能型”机顶盒指的是操作系统是android的4K智能机顶盒，“融合型”机顶盒是指叠加了路由、WIFI功能的智能型机顶盒，可以在&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvMac.png&quot;&gt;《IPTV机顶盒MAC地址对应表》&lt;/a&gt;查下相关型号的机顶盒。&lt;/p&gt;
+
+&lt;p&gt;机顶盒网络接入上，现网机顶盒一般分有线和Wifi无线两种连接模式。有线接入模式下，包括了PPPoE拨号、DHCP、静态、IPoE接入四种方式；Wifi无线方式，一般是在采用家庭普通上网宽带的无线网络接入。&lt;/p&gt;
+
+&lt;h3 id=&quot;2iptv视频承载模式&quot;&gt;2.IPTV视频承载模式&lt;/h3&gt;
+
+&lt;p&gt;IPTV视频节目有直播和点播两大类，不同类型节目有不同的网络承载模式及特点，具体如下：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;直播：&lt;/code&gt;指直播频道，直播视频流有两种承载模式：
+    &lt;ul&gt;
+      &lt;li&gt;
+        &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;（1）组播模式：&lt;/code&gt;直播视频流以组播的方式跑在城域网络上，这种模式下，直播视频流不经过CDN节点，直播视频流质量不受CDN节点的任何影响。视频流由头端顶层发流，直接通过城域网直接送给机顶盒，不经过CDN处理，环节少，承载网络Qos优先级高，视频播放质量更有保障，故障发生率较低。&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;gt;&amp;gt;&amp;gt;特别注意，组播模式在PPPoE拨号和IPoE拨号接入下支持，对于采用DHCP、Wifi公网接入是不支持的。&lt;/code&gt;&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;（2）单播模式：&lt;/code&gt;直播视频流以点对点单播模式承载，即CDN节点的流服务器先从城域网收直播组播流，在CDN服务器上转换为单播视频流，再点对点发给机顶盒。视频流由CDN逐级转发，逐级处理，环节多，Qos优先级低于组播模式，视频播放质量保障力度稍弱。支持所有接入模式的机顶盒。&lt;/p&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;点播：&lt;/code&gt;只支持&lt;code class=&quot;highlighter-rouge&quot;&gt;单播模式&lt;/code&gt;，由顶级CDN节点以单播模式分发给下级CDN节点，再由下级CDN服务器以单播方式点对点发给机顶盒。视频流由CDN逐级分发，层层处理，环节多，Qos优先级低于组播模式，视频播放质量保障力度稍弱。支持所有接入模式的机顶盒。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;3不同网络接入和视频质量运维关系&quot;&gt;3.不同网络接入和视频质量、运维关系&lt;/h3&gt;
+
+&lt;p&gt;从2中的分析，我们可以容易概括出机顶盒不同接入方式对IPTV视频播放质量（特别是高清直播）和维护难易程度的影响关系如下：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;序号&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;机顶盒网络接入方式&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;带宽保障&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;QoS优先级&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;视频播放故障率&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;宽带共享影响&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Wifi干扰大&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;故障处理难度&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;推荐&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;PPPoE/IPoE拨号专网接入&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;高&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;高（组播）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;低（受节目源、组播网络影响）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;无&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;无&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;大，不需穿越家庭内网，机顶盒维护相对容易；&lt;code class=&quot;highlighter-rouge&quot;&gt;诊断环节包括：节目源－城域网－接入网络－家庭网络－机顶盒&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;推荐&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;DHCP/Wifi公网接入&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;低（抢占上网流量）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;低（单播）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;高（受节目源、组播网络、CDN服务器、家庭网络影响）&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;大&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;大&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;更大，无法穿越家庭内网，机顶盒维护难度大；&lt;code class=&quot;highlighter-rouge&quot;&gt;诊断环节包括：节目源－城域网－各级CDN－接入网络－家庭网络－机顶盒&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;实在无法采用专网拨号方式下才使用&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;除此之外，组播模式对CDN的计算资源和城域网带宽资源更有优势，比如，假设单播和点播收视比为1:1、假设CDN平台支撑1000万并发容量，则采用组播接入下，CDN平台和承载网络带宽能力支持2000万并发；采用单播接入下，CDN平台和承载网络只能支持1000万并发。因此采用组播模式可释放CDN服务能力资源和网络带宽资源，腾出的CDN计算资源和带宽资源，在忙时可支撑更多的单播业务（点播和单播直播），使得整体视频播放更流畅。&lt;/p&gt;
+
+&lt;p&gt;综上分析，直播频道采用&lt;code class=&quot;highlighter-rouge&quot;&gt;组播模式&lt;/code&gt;比&lt;code class=&quot;highlighter-rouge&quot;&gt;单播模式&lt;/code&gt;有更流畅的视频播放体验、相对容易的运维优势和更低的CDN和承载网络投资成本三项优势，因此我们&lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;强烈建议IPTV机顶盒尽量采用IPTV专网PPPoE/IPoE拨号方式接入网络，这样视频播放流畅度更有保障，故障率更低。&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;4使用wifi观看iptv视频需合理布局ap&quot;&gt;4.使用Wifi观看IPTV视频，需合理布局AP&lt;/h3&gt;
+
+&lt;p&gt;从3的分析，我们优先推荐机顶盒采用有线的PPPoE/IPoE拨号模式接入网络观看IPTV视频；但如果特殊场景下，实在无法采用专网PPPoE/IPoE拨号方式时，仍可尝试使用DHCP/Wifi路由模式接入。其中对Wifi无线接入的方式，Wifi组网需要合理部署，才能最大程度保障IPTV视频播放质量。&lt;/p&gt;
+
+&lt;h4 id=&quot;41-wifi信号衰减实验&quot;&gt;4.1 Wifi信号衰减实验&lt;/h4&gt;
+
+&lt;p&gt;为测试受墙壁障碍物阻隔Wifi信号衰减程度，本人做了一个简单的实验，在房间内部署一个Wifi Ap，选取5个监测点，监测点A表示无阻隔，B表示隔1道墙，C近似表示隔1.5道墙（考虑中间其他障碍物和10米距离），D点隔2到墙壁，E点隔3到墙壁，如下图所示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/img/IptvNetAcc/WifiTest.png&quot; alt=&quot;Wifi速率测速组网图&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在5个监测点分别测试Wifi速率：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Wifi速率监测点&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;TOTOLINK N350RP&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;TPLINK TL-H29&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;A&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;50M&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;97M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;B&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;46M&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;94M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;C&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;17M&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;80M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;D&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;9M&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;50M&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;E&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;3M&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;40M&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;注：测速账号光纤100M，测速使用&lt;a href=&quot;http://10000.gd.cn/&quot;&gt;电信宽带测速系统&lt;/a&gt;，测速两次平均，误差”+/-1M”，测试使用相同的笔记本无线接收网卡，Wifi AP采用默认参数配置&lt;/p&gt;
+
+&lt;h4 id=&quot;42-wifi组网小结&quot;&gt;4.2 Wifi组网小结&lt;/h4&gt;
+
+&lt;p&gt;（1）Wifi信号容易受障墙壁等碍物的影响，穿墙后信号衰减大，上述实验测试结果显示：穿墙两次及以上的Wifi信号衰减很快。使用中等价位的路由器（如上述测试使用的TOTOLink），穿越1.5道墙或同等障碍物后已无法流畅播放IPTV 4K或超清节目（超清带宽要20M、4K要30M以上）；穿越2道墙后，已经无法流畅播放IPTV高清节目（高清要大于10M带宽）；穿越3道墙壁后，已无法流畅播放IPTV 标清节目（标清要大于3M带宽）。因此，在确实无法采用有线PPPoE/IPoE时而采用Wifi观看IPTV视频，Wifi的组网方案可采用下面两个原则：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;重点是把Wifi AP部署在合适的位置，减少穿墙&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;采用性能跟高的Wifi AP以及电力猫组网延伸无线信号覆盖等&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;（2）普通的路由器AP，Wifi多数工作在2.4G频段，这个频段只有3个不重叠的信道，如果在家庭中收到来自多个Wifi AP信号，则其中必然有信道重叠的AP，会造成干扰，导致Wifi速率低。因此，在AP密集的场景下，可以选择5G频段的路由器，会有更多的不重叠信道，干扰小，保障较高速率。&lt;/p&gt;
+
+&lt;p&gt;（3）Wifi信号受到多方面的影响，包括但不限：Wifi AP性能（硬件性能、软参数配置），障碍物体积材质，接收端Wifi网卡性能，距离，信道干扰等，具体组网时需要具体测试。&lt;/p&gt;
+</description>
+        <pubDate>Mon, 13 Feb 2017 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2017/02/13/IPTV%E6%9C%BA%E9%A1%B6%E7%9B%92%E5%AE%B6%E5%BA%AD%E7%BB%84%E7%BD%91%E6%9C%80%E4%BC%98%E6%96%B9%E6%A1%88%E9%80%89%E6%8B%A9/</link>
+        <guid isPermaLink="true">http://localhost:4000/2017/02/13/IPTV%E6%9C%BA%E9%A1%B6%E7%9B%92%E5%AE%B6%E5%BA%AD%E7%BB%84%E7%BD%91%E6%9C%80%E4%BC%98%E6%96%B9%E6%A1%88%E9%80%89%E6%8B%A9/</guid>
+        
+        <category>IPTV</category>
+        
+        <category>技术维护</category>
+        
+        <category>原创</category>
+        
+        
+      </item>
     
       <item>
         <title>IPTV常见故障处理指引</title>
@@ -163,7 +315,7 @@
 &lt;h3 id=&quot;6其他&quot;&gt;6.其他&lt;/h3&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;想测试一下你的IPTV技术知识么？这里有一份原创性试卷&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvTest.pdf&quot;&gt;《广东天翼高清专家人才考试试卷》&lt;/a&gt;，值得尝试一下。&lt;/li&gt;
+  &lt;li&gt;想测试一下你的IPTV技术知识么？这里有一份测试题目，&lt;a href=&quot;/img/IptvTroubleshoot/docx/IptvTest.pdf&quot;&gt;《天翼高清测试题》&lt;/a&gt;，不妨尝试一下。&lt;/li&gt;
 &lt;/ol&gt;
 
 </description>
