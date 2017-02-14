@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="邵壮丰的博客：关于IPTV技术工作的点滴记录，和兴趣的技术分享。专注、关注的技术主要包括IPTV、OTT、CDN、机器学习、模式识别、WEB和移动前端全栈、大数据、网络安全。">
+    <meta name="keywords"  content="邵壮丰,zfshao,xyzszf,邵壮丰博客,Blog,IPTV,OTT,CDN,机器学习,前端,全栈,大数据,网络安全">
+    <meta name="theme-color" content="#000000">
+    
+    <title>为何推荐IPTV机顶盒采用PPPoE/IPoE拨号方式观看视频 - 邵壮丰的博客 | zfshao Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2017/02/13/IPTV%E6%9C%BA%E9%A1%B6%E7%9B%92%E5%AE%B6%E5%BA%AD%E7%BB%84%E7%BD%91%E6%9C%80%E4%BC%98%E6%96%B9%E6%A1%88%E9%80%89%E6%8B%A9/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!--  change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!--  Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">zfshao</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-xk.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-xk.jpg')
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.3);
+    }
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#IPTV" title="IPTV">IPTV</a>
+                        
+                        <a class="tag" href="/tags/#技术维护" title="技术维护">技术维护</a>
+                        
+                        <a class="tag" href="/tags/#原创" title="原创">原创</a>
+                        
+                    </div>
+                    <h1>为何推荐IPTV机顶盒采用PPPoE/IPoE拨号方式观看视频</h1>
+                    
+                    
+                    <h2 class="subheading">IPTV机顶盒最优家庭组网方案选择</h2>
+                    
+                    <span class="meta">Posted by 邵壮丰 on February 13, 2017</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p><strong><code class="highlighter-rouge">电信IPTV一线装维工程师，在给用户安装IPTV机顶盒时，会困惑到底要给机顶盒采用哪种网络接入方式，是采用拨号方式呢？还是采用Wifi方式？这篇文章，将解答这个困惑。因此，这片文章特别适合IPTV一线装维人员、用户阅读：</code></strong></p>
+
+<h3 id="1机顶盒支持的网络接入模式">1.机顶盒支持的网络接入模式</h3>
+<p>IPTV机顶盒，分“功能型”机顶盒、“智能型”和“融合型”机顶盒，功能型指机顶盒操作系统是linux系统的普通标清和普通高清机顶盒，“智能型”机顶盒指的是操作系统是android的4K智能机顶盒，“融合型”机顶盒是指叠加了路由、WIFI功能的智能型机顶盒，可以在<a href="/img/IptvTroubleshoot/docx/IptvMac.png">《IPTV机顶盒MAC地址对应表》</a>查下相关型号的机顶盒。</p>
+
+<p>机顶盒网络接入上，现网机顶盒一般分有线和Wifi无线两种连接模式。有线接入模式下，包括了PPPoE拨号、DHCP、静态、IPoE接入四种方式；Wifi无线方式，一般是在采用家庭普通上网宽带的无线网络接入。</p>
+
+<h3 id="2iptv视频承载模式">2.IPTV视频承载模式</h3>
+
+<p>IPTV视频节目有直播和点播两大类，不同类型节目有不同的网络承载模式及特点，具体如下：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">直播：</code>指直播频道，直播视频流有两种承载模式：
+    <ul>
+      <li>
+        <p><code class="highlighter-rouge">（1）组播模式：</code>直播视频流以组播的方式跑在城域网络上，这种模式下，直播视频流不经过CDN节点，直播视频流质量不受CDN节点的任何影响。视频流由头端顶层发流，直接通过城域网直接送给机顶盒，不经过CDN处理，环节少，承载网络Qos优先级高，视频播放质量更有保障，故障发生率较低。<code class="highlighter-rouge">&gt;&gt;&gt;特别注意，组播模式在PPPoE拨号和IPoE拨号接入下支持，对于采用DHCP、Wifi公网接入是不支持的。</code></p>
+      </li>
+      <li>
+        <p><code class="highlighter-rouge">（2）单播模式：</code>直播视频流以点对点单播模式承载，即CDN节点的流服务器先从城域网收直播组播流，在CDN服务器上转换为单播视频流，再点对点发给机顶盒。视频流由CDN逐级转发，逐级处理，环节多，Qos优先级低于组播模式，视频播放质量保障力度稍弱。支持所有接入模式的机顶盒。</p>
+      </li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">点播：</code>只支持<code class="highlighter-rouge">单播模式</code>，由顶级CDN节点以单播模式分发给下级CDN节点，再由下级CDN服务器以单播方式点对点发给机顶盒。视频流由CDN逐级分发，层层处理，环节多，Qos优先级低于组播模式，视频播放质量保障力度稍弱。支持所有接入模式的机顶盒。</li>
+</ul>
+
+<h3 id="3不同网络接入和视频质量运维关系">3.不同网络接入和视频质量、运维关系</h3>
+
+<p>从2中的分析，我们可以容易概括出机顶盒不同接入方式对IPTV视频播放质量（特别是高清直播）和维护难易程度的影响关系如下：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">序号</th>
+      <th style="text-align: center">机顶盒网络接入方式</th>
+      <th style="text-align: center">带宽保障</th>
+      <th style="text-align: center">QoS优先级</th>
+      <th style="text-align: center">视频播放故障率</th>
+      <th style="text-align: center">宽带共享影响</th>
+      <th style="text-align: center">Wifi干扰大</th>
+      <th style="text-align: center">故障处理难度</th>
+      <th style="text-align: center">推荐</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">1</td>
+      <td style="text-align: center">PPPoE/IPoE拨号专网接入</td>
+      <td style="text-align: center">高</td>
+      <td style="text-align: center">高（组播）</td>
+      <td style="text-align: center">低（受节目源、组播网络影响）</td>
+      <td style="text-align: center">无</td>
+      <td style="text-align: center">无</td>
+      <td style="text-align: center">大，不需穿越家庭内网，机顶盒维护相对容易；<code class="highlighter-rouge">诊断环节包括：节目源－城域网－接入网络－家庭网络－机顶盒</code></td>
+      <td style="text-align: center"><strong><code class="highlighter-rouge">推荐</code></strong></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">2</td>
+      <td style="text-align: center">DHCP/Wifi公网接入</td>
+      <td style="text-align: center">低（抢占上网流量）</td>
+      <td style="text-align: center">低（单播）</td>
+      <td style="text-align: center">高（受节目源、组播网络、CDN服务器、家庭网络影响）</td>
+      <td style="text-align: center">大</td>
+      <td style="text-align: center">大</td>
+      <td style="text-align: center">更大，无法穿越家庭内网，机顶盒维护难度大；<code class="highlighter-rouge">诊断环节包括：节目源－城域网－各级CDN－接入网络－家庭网络－机顶盒</code></td>
+      <td style="text-align: center">实在无法采用专网拨号方式下才使用</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>除此之外，组播模式对CDN的计算资源和城域网带宽资源更有优势，比如，假设单播和点播收视比为1:1、假设CDN平台支撑1000万并发容量，则采用组播接入下，CDN平台和承载网络带宽能力支持2000万并发；采用单播接入下，CDN平台和承载网络只能支持1000万并发。因此采用组播模式可释放CDN服务能力资源和网络带宽资源，腾出的CDN计算资源和带宽资源，在忙时可支撑更多的单播业务（点播和单播直播），使得整体视频播放更流畅。</p>
+
+<p>综上分析，直播频道采用<code class="highlighter-rouge">组播模式</code>比<code class="highlighter-rouge">单播模式</code>有更流畅的视频播放体验、相对容易的运维优势和更低的CDN和承载网络投资成本三项优势，因此我们<strong><code class="highlighter-rouge">强烈建议IPTV机顶盒尽量采用IPTV专网PPPoE/IPoE拨号方式接入网络，这样视频播放流畅度更有保障，故障率更低。</code></strong></p>
+
+<h3 id="4使用wifi观看iptv视频需合理布局ap">4.使用Wifi观看IPTV视频，需合理布局AP</h3>
+
+<p>从3的分析，我们优先推荐机顶盒采用有线的PPPoE/IPoE拨号模式接入网络观看IPTV视频；但如果特殊场景下，实在无法采用专网PPPoE/IPoE拨号方式时，仍可尝试使用DHCP/Wifi路由模式接入。其中对Wifi无线接入的方式，Wifi组网需要合理部署，才能最大程度保障IPTV视频播放质量。</p>
+
+<h4 id="41-wifi信号衰减实验">4.1 Wifi信号衰减实验</h4>
+
+<p>为测试受墙壁障碍物阻隔Wifi信号衰减程度，本人做了一个简单的实验，在房间内部署一个Wifi Ap，选取5个监测点，监测点A表示无阻隔，B表示隔1道墙，C近似表示隔1.5道墙（考虑中间其他障碍物和10米距离），D点隔2到墙壁，E点隔3到墙壁，如下图所示：</p>
+
+<p><img src="/img/IptvNetAcc/WifiTest.png" alt="Wifi速率测速组网图" /></p>
+
+<p>在5个监测点分别测试Wifi速率：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Wifi速率监测点</th>
+      <th style="text-align: center">TOTOLINK N350RP</th>
+      <th style="text-align: center">TPLINK TL-H29</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">A</td>
+      <td style="text-align: center">50M</td>
+      <td style="text-align: center">97M</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">B</td>
+      <td style="text-align: center">46M</td>
+      <td style="text-align: center">94M</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">C</td>
+      <td style="text-align: center">17M</td>
+      <td style="text-align: center">80M</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">D</td>
+      <td style="text-align: center">9M</td>
+      <td style="text-align: center">50M</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">E</td>
+      <td style="text-align: center">3M</td>
+      <td style="text-align: center">40M</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>注：测速账号光纤100M，测速使用<a href="http://10000.gd.cn/">电信宽带测速系统</a>，测速两次平均，误差”+/-1M”，测试使用相同的笔记本无线接收网卡，Wifi AP采用默认参数配置</p>
+
+<h4 id="42-wifi组网小结">4.2 Wifi组网小结</h4>
+
+<p>（1）Wifi信号容易受障墙壁等碍物的影响，穿墙后信号衰减大，上述实验测试结果显示：穿墙两次及以上的Wifi信号衰减很快。使用中等价位的路由器（如上述测试使用的TOTOLink），穿越1.5道墙或同等障碍物后已无法流畅播放IPTV 4K或超清节目（超清带宽要20M、4K要30M以上）；穿越2道墙后，已经无法流畅播放IPTV高清节目（高清要大于10M带宽）；穿越3道墙壁后，已无法流畅播放IPTV 标清节目（标清要大于3M带宽）。因此，在确实无法采用有线PPPoE/IPoE时而采用Wifi观看IPTV视频，Wifi的组网方案可采用下面两个原则：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">重点是把Wifi AP部署在合适的位置，减少穿墙</code></li>
+  <li><code class="highlighter-rouge">采用性能跟高的Wifi AP以及电力猫组网延伸无线信号覆盖等</code></li>
+</ul>
+
+<p>（2）普通的路由器AP，Wifi多数工作在2.4G频段，这个频段只有3个不重叠的信道，如果在家庭中收到来自多个Wifi AP信号，则其中必然有信道重叠的AP，会造成干扰，导致Wifi速率低。因此，在AP密集的场景下，可以选择5G频段的路由器，会有更多的不重叠信道，干扰小，保障较高速率。</p>
+
+<p>（3）Wifi信号受到多方面的影响，包括但不限：Wifi AP性能（硬件性能、软参数配置），障碍物体积材质，接收端Wifi网卡性能，距离，信道干扰等，具体组网时需要具体测试。</p>
+
+
+                <hr style="visibility: hidden;">
+
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2017/01/25/IPTV%E5%B8%B8%E8%A7%81%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%BC%95/" data-toggle="tooltip" data-placement="top" title="IPTV常见故障处理指引">
+                        Previous<br>
+                        <span>IPTV常见故障处理指引</span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+
+
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#IPTV" title="IPTV" rel="8">
+                                    IPTV
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#技术" title="技术" rel="3">
+                                    技术
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#原创" title="原创" rel="8">
+                                    原创
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#技术发展" title="技术发展" rel="4">
+                                    技术发展
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://shaozhuangfeng.github.io">Is Me</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/zfshao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/shaozhuangfeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; zfshao 2017
+                    <br>
+                    
+<!--                    Theme by <a href="http://zfshao.me">邵壮丰 Zfshao</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=xyzszf&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+-->                    
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'zfshao.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+        var P = $('div.post-container'),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;    
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
