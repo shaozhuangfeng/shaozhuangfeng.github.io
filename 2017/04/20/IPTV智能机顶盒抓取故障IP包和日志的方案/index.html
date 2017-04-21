@@ -10,7 +10,7 @@
     <meta name="keywords"  content="邵壮丰,zfshao,xyzszf,邵壮丰博客,Blog,IPTV,OTT,CDN,机器学习,前端,全栈,大数据,网络安全">
     <meta name="theme-color" content="#000000">
     
-    <title>为何推荐IPTV机顶盒采用PPPoE/IPoE拨号方式观看视频 - 邵壮丰的博客 | zfshao Blog</title>
+    <title>IPTV智能机顶盒故障数据快速抓取原理和实现方法 - 邵壮丰的博客 | zfshao Blog</title>
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="http://localhost:4000/2017/02/13/IPTV%E6%9C%BA%E9%A1%B6%E7%9B%92%E5%AE%B6%E5%BA%AD%E7%BB%84%E7%BD%91%E6%9C%80%E4%BC%98%E6%96%B9%E6%A1%88%E9%80%89%E6%8B%A9/">
+    <link rel="canonical" href="http://localhost:4000/2017/04/20/IPTV%E6%99%BA%E8%83%BD%E6%9C%BA%E9%A1%B6%E7%9B%92%E6%8A%93%E5%8F%96%E6%95%85%E9%9A%9CIP%E5%8C%85%E5%92%8C%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%A1%88/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -147,13 +147,13 @@
 
     <!-- Image to hack wechat -->
 <!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
-<!-- <img src="/img/post-bg-xk.jpg" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-hj.jpeg" width="0" height="0"> -->
 
 <!-- Post Header -->
 <style type="text/css">
     header.intro-header{
         position: relative;
-        background-image: url('/img/post-bg-xk.jpg')
+        background-image: url('/img/post-bg-hj.jpeg')
     }
 
     
@@ -180,12 +180,12 @@
                         <a class="tag" href="/tags/#原创" title="原创">原创</a>
                         
                     </div>
-                    <h1>为何推荐IPTV机顶盒采用PPPoE/IPoE拨号方式观看视频</h1>
+                    <h1>IPTV智能机顶盒故障数据快速抓取原理和实现方法</h1>
                     
                     
-                    <h2 class="subheading">IPTV机顶盒最优家庭组网方案选择</h2>
+                    <h2 class="subheading">IPTV自助服务之一</h2>
                     
-                    <span class="meta">Posted by 邵壮丰 on February 13, 2017</span>
+                    <span class="meta">Posted by 邵壮丰 on April 20, 2017</span>
                 </div>
             </div>
         </div>
@@ -203,142 +203,34 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-				<p><strong><code class="highlighter-rouge">电信IPTV一线装维工程师，在给用户安装IPTV机顶盒时，会困惑到底要给机顶盒采用哪种网络接入方式，是采用拨号方式呢？还是采用Wifi方式？这篇文章，将解答这个困惑。因此，这片文章特别适合IPTV一线装维人员、用户阅读：</code></strong></p>
+				<p><strong><code class="highlighter-rouge">IPTV发生疑难故障时，比如视频播放卡顿、黑片或提示10071错误代码等故障现象，要定位分析这种故障，有时需要抓取发送故障时机顶盒发送和收到双向的IP数据报文、机顶盒日志信息和机顶盒配置信息，通常抓取这些数据需要使用专用的维护工具如机顶盒stbmonitor或adb工具或挂个hub或挂个交换机做个端口镜像，但是这些使用这些方法有一定难度和门槛，为简化机顶盒故障场景故障数据的采集、提高采集效率，同时让所有人都能采集数据，我们在机顶盒上自主开发上线了一个“IPTV自助服务”功能，方便用户和一线装维工程师的使用。本文适合IPTV一线装维人员、用户阅读：</code></strong></p>
 
-<h3 id="1机顶盒支持的网络接入模式">1.机顶盒支持的网络接入模式</h3>
-<p>IPTV机顶盒，分“功能型”机顶盒、“智能型”和“融合型”机顶盒，功能型指机顶盒操作系统是linux系统的普通标清和普通高清机顶盒，“智能型”机顶盒指的是操作系统是android的4K智能机顶盒，“融合型”机顶盒是指叠加了路由、WIFI功能的智能型机顶盒，可以在<a href="/img/IptvTroubleshoot/docx/IptvMac.png">《IPTV机顶盒MAC地址对应表》</a>查下相关型号的机顶盒。</p>
+<h3 id="1故障场景数据抓取原理">1.故障场景数据抓取原理</h3>
+<p>当发生持续性或会重复出现的故障，比如点击EPG总是提示10071或者视频播放总是出现卡顿或黑屏等，在EPG上触发故障数据记录的开关，触发开关后，机顶盒会自动启动tcpdump、log记录、网络测试、测速功能，等到用户触发停止记录时，这些抓取的数据，连同机顶盒的配置，会生成相应的文件，自动上传到自助服务后台服务器上，然后维护人员登录到后台就可以导出故障场景的数据，用于辅助故障分析定位。这样就不用在用户家里东搞搞西搞搞折腾抓包了，甚至你可以远程指导下用户在发生故障时自己操作都可以，都不用蹬蹬蹬跑到用户家里，然后故障又没有了，走了故障又来了的尴尬场景，简单吧。</p>
 
-<p>机顶盒网络接入上，现网机顶盒一般分有线和Wifi无线两种连接模式。有线接入模式下，包括了PPPoE拨号、DHCP、静态、IPoE接入四种方式；Wifi无线方式，一般是在采用家庭普通上网宽带的无线网络接入。</p>
+<h3 id="2哪些机顶盒支持">2.哪些机顶盒支持</h3>
 
-<h3 id="2iptv视频承载模式">2.IPTV视频承载模式</h3>
+<p>截止2017年4月20日，除了华为机顶盒还不支持外，目前广东现网的中兴、创维、九州、烽火、九联、TCL、长虹、银河、兆能等4K智能机顶盒都支持了该功能，华为EC6108V9机顶盒预计在2017年5月份后也会支持。不管怎么样，在“设置”界面中，你看到了“自助服务”模块，就表示支持了这个功能，就是下面这家伙：</p>
 
-<p>IPTV视频节目有直播和点播两大类，不同类型节目有不同的网络承载模式及特点，具体如下：</p>
+<p><img src="/img/IptvDump/p1.png" alt="机顶盒自助服务" /></p>
 
-<ul>
-  <li><code class="highlighter-rouge">直播：</code>指直播频道，直播视频流有两种承载模式：
-    <ul>
-      <li>
-        <p><code class="highlighter-rouge">（1）组播模式：</code>直播视频流以组播的方式跑在城域网络上，这种模式下，直播视频流不经过CDN节点，直播视频流质量不受CDN节点的任何影响。视频流由头端顶层发流，直接通过城域网直接送给机顶盒，不经过CDN处理，环节少，承载网络Qos优先级高，视频播放质量更有保障，故障发生率较低。<code class="highlighter-rouge">&gt;&gt;&gt;特别注意，组播模式在PPPoE拨号和IPoE拨号接入下支持，对于采用DHCP、Wifi公网接入是不支持的。</code></p>
-      </li>
-      <li>
-        <p><code class="highlighter-rouge">（2）单播模式：</code>直播视频流以点对点单播模式承载，即CDN节点的流服务器先从城域网收直播组播流，在CDN服务器上转换为单播视频流，再点对点发给机顶盒。视频流由CDN逐级转发，逐级处理，环节多，Qos优先级低于组播模式，视频播放质量保障力度稍弱。支持所有接入模式的机顶盒。</p>
-      </li>
-    </ul>
-  </li>
-  <li><code class="highlighter-rouge">点播：</code>只支持<code class="highlighter-rouge">单播模式</code>，由顶级CDN节点以单播模式分发给下级CDN节点，再由下级CDN服务器以单播方式点对点发给机顶盒。视频流由CDN逐级分发，层层处理，环节多，Qos优先级低于组播模式，视频播放质量保障力度稍弱。支持所有接入模式的机顶盒。</li>
-</ul>
+<h3 id="3怎么使用">3.怎么使用</h3>
 
-<h3 id="3不同网络接入和视频质量运维关系">3.不同网络接入和视频质量、运维关系</h3>
+<p>就是用遥控器点点点点点点点点点点点点点点点点点点点点点点点点点点点点点点点点点点点点，看看就会了不用我多说。点完了，就去电子运维系统上申请个自助服务后台账号，以后登录上去把各种数据取下来，分析分析。少刷点微信多研究几个故障案例，你就能成为大牛，或者在成为大牛的路上，之后你就大概能判断出是什么故障，要怎么解决或者找谁解决了。看看<a href="https://shaozhuangfeng.github.io/2017/01/25/IPTV%E5%B8%B8%E8%A7%81%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%BC%95/">IPTV常见故障处理指引</a>这篇文章也有帮助提升技能。</p>
 
-<p>从2中的分析，我们可以容易概括出机顶盒不同接入方式对IPTV视频播放质量（特别是高清直播）和维护难易程度的影响关系如下：</p>
+<p><img src="/img/IptvDump/p2.png" alt="选择故障类型" /></p>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">序号</th>
-      <th style="text-align: center">机顶盒网络接入方式</th>
-      <th style="text-align: center">带宽保障</th>
-      <th style="text-align: center">QoS优先级</th>
-      <th style="text-align: center">视频播放故障率</th>
-      <th style="text-align: center">宽带共享影响</th>
-      <th style="text-align: center">Wifi干扰大</th>
-      <th style="text-align: center">故障处理难度</th>
-      <th style="text-align: center">推荐</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">1</td>
-      <td style="text-align: center">PPPoE/IPoE拨号专网接入</td>
-      <td style="text-align: center">高</td>
-      <td style="text-align: center">高（组播）</td>
-      <td style="text-align: center">低（受节目源、组播网络影响）</td>
-      <td style="text-align: center">无</td>
-      <td style="text-align: center">无</td>
-      <td style="text-align: center">大，不需穿越家庭内网，机顶盒维护相对容易；<code class="highlighter-rouge">诊断环节包括：节目源－城域网－接入网络－家庭网络－机顶盒</code></td>
-      <td style="text-align: center"><strong><code class="highlighter-rouge">推荐</code></strong></td>
-    </tr>
-    <tr>
-      <td style="text-align: center">2</td>
-      <td style="text-align: center">DHCP/Wifi公网接入</td>
-      <td style="text-align: center">低（抢占上网流量）</td>
-      <td style="text-align: center">低（单播）</td>
-      <td style="text-align: center">高（受节目源、组播网络、CDN服务器、家庭网络影响）</td>
-      <td style="text-align: center">大</td>
-      <td style="text-align: center">大</td>
-      <td style="text-align: center">更大，无法穿越家庭内网，机顶盒维护难度大；<code class="highlighter-rouge">诊断环节包括：节目源－城域网－各级CDN－接入网络－家庭网络－机顶盒</code></td>
-      <td style="text-align: center">实在无法采用专网拨号方式下才使用</td>
-    </tr>
-  </tbody>
-</table>
+<p><img src="/img/IptvDump/p3.png" alt="开始" /></p>
 
-<p>除此之外，组播模式对CDN的计算资源和城域网带宽资源更有优势，比如，假设单播和点播收视比为1:1、假设CDN平台支撑1000万并发容量，则采用组播接入下，CDN平台和承载网络带宽能力支持2000万并发；采用单播接入下，CDN平台和承载网络只能支持1000万并发。因此采用组播模式可释放CDN服务能力资源和网络带宽资源，腾出的CDN计算资源和带宽资源，在忙时可支撑更多的单播业务（点播和单播直播），使得整体视频播放更流畅。</p>
+<p><img src="/img/IptvDump/p4.png" alt="复现故障" /></p>
 
-<p>综上分析，直播频道采用<code class="highlighter-rouge">组播模式</code>比<code class="highlighter-rouge">单播模式</code>有更流畅的视频播放体验、相对容易的运维优势和更低的CDN和承载网络投资成本三项优势，因此我们<strong><code class="highlighter-rouge">强烈建议IPTV机顶盒尽量采用IPTV专网PPPoE/IPoE拨号方式接入网络，这样视频播放流畅度更有保障，故障率更低。</code></strong></p>
+<p><img src="/img/IptvDump/p5.png" alt="暂停记录" /></p>
 
-<h3 id="4使用wifi观看iptv视频需合理布局ap">4.使用Wifi观看IPTV视频，需合理布局AP</h3>
+<p><img src="/img/IptvDump/p6.png" alt="上传数据" /></p>
 
-<p>从3的分析，我们优先推荐机顶盒采用有线的PPPoE/IPoE拨号模式接入网络观看IPTV视频；但如果特殊场景下，实在无法采用专网PPPoE/IPoE拨号方式时，仍可尝试使用DHCP/Wifi路由模式接入。其中对Wifi无线接入的方式，Wifi组网需要合理部署，才能最大程度保障IPTV视频播放质量。</p>
+<p><img src="/img/IptvDump/p7.png" alt="登录后台下载数据" /></p>
 
-<h4 id="41-wifi信号衰减实验">4.1 Wifi信号衰减实验</h4>
-
-<p>为测试受墙壁障碍物阻隔Wifi信号衰减程度，本人做了一个简单的实验，在房间内部署一个Wifi Ap，选取5个监测点，监测点A表示无阻隔，B表示隔1道墙，C近似表示隔1.5道墙（考虑中间其他障碍物和10米距离），D点隔2到墙壁，E点隔3到墙壁，如下图所示：</p>
-
-<p><img src="/img/IptvNetAcc/WifiTest.png" alt="Wifi速率测速组网图" /></p>
-
-<p>在5个监测点分别测试Wifi速率：</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">Wifi速率监测点</th>
-      <th style="text-align: center">TOTOLINK N350RP</th>
-      <th style="text-align: center">TPLINK TL-H29</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">A</td>
-      <td style="text-align: center">50M</td>
-      <td style="text-align: center">97M</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">B</td>
-      <td style="text-align: center">46M</td>
-      <td style="text-align: center">94M</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">C</td>
-      <td style="text-align: center">17M</td>
-      <td style="text-align: center">80M</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">D</td>
-      <td style="text-align: center">9M</td>
-      <td style="text-align: center">50M</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">E</td>
-      <td style="text-align: center">3M</td>
-      <td style="text-align: center">40M</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>注：测速账号光纤100M，测速使用<a href="http://10000.gd.cn/">电信宽带测速系统</a>，测速两次平均，误差”+/-1M”，测试使用相同的笔记本无线接收网卡，Wifi AP采用默认参数配置</p>
-
-<h4 id="42-wifi组网小结">4.2 Wifi组网小结</h4>
-
-<p>（1）Wifi信号容易受障墙壁等碍物的影响，穿墙后信号衰减大，上述实验测试结果显示：穿墙两次及以上的Wifi信号衰减很快。使用中等价位的路由器（如上述测试使用的TOTOLink），穿越1.5道墙或同等障碍物后已无法流畅播放IPTV 4K或超清节目（超清带宽要20M、4K要30M以上）；穿越2道墙后，已经无法流畅播放IPTV高清节目（高清要大于10M带宽）；穿越3道墙壁后，已无法流畅播放IPTV 标清节目（标清要大于3M带宽）。因此，在确实无法采用有线PPPoE/IPoE时而采用Wifi观看IPTV视频，Wifi的组网方案可采用下面两个原则：</p>
-
-<ul>
-  <li><code class="highlighter-rouge">重点是把Wifi AP部署在合适的位置，减少穿墙</code></li>
-  <li><code class="highlighter-rouge">采用性能跟高的Wifi AP以及电力猫组网延伸无线信号覆盖等</code></li>
-</ul>
-
-<p>（2）普通的路由器AP，Wifi多数工作在2.4G频段，这个频段只有3个不重叠的信道，如果在家庭中收到来自多个Wifi AP信号，则其中必然有信道重叠的AP，会造成干扰，导致Wifi速率低。因此，在AP密集的场景下，可以选择5G频段的路由器，会有更多的不重叠信道，干扰小，保障较高速率。</p>
-
-<p>（3）Wifi信号受到多方面的影响，包括但不限：Wifi AP性能（硬件性能、软参数配置），障碍物体积材质，接收端Wifi网卡性能，距离，信道干扰等，具体组网时需要具体测试。</p>
+<p>如果你有什么好的idear，记得告诉我，我们把这个功能优化优化，帮助更多人。</p>
 
 
                 <hr style="visibility: hidden;">
@@ -348,19 +240,12 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2017/01/25/IPTV%E5%B8%B8%E8%A7%81%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%BC%95/" data-toggle="tooltip" data-placement="top" title="IPTV常见故障处理指引">
+                        <a href="/2017/02/13/IPTV%E6%9C%BA%E9%A1%B6%E7%9B%92%E5%AE%B6%E5%BA%AD%E7%BB%84%E7%BD%91%E6%9C%80%E4%BC%98%E6%96%B9%E6%A1%88%E9%80%89%E6%8B%A9/" data-toggle="tooltip" data-placement="top" title="为何推荐IPTV机顶盒采用PPPoE/IPoE拨号方式观看视频">
                         Previous<br>
-                        <span>IPTV常见故障处理指引</span>
+                        <span>为何推荐IPTV机顶盒采用PPPoE/IPoE拨号方式观看视频</span>
                         </a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/2017/04/20/IPTV%E6%99%BA%E8%83%BD%E6%9C%BA%E9%A1%B6%E7%9B%92%E6%8A%93%E5%8F%96%E6%95%85%E9%9A%9CIP%E5%8C%85%E5%92%8C%E6%97%A5%E5%BF%97%E7%9A%84%E6%96%B9%E6%A1%88/" data-toggle="tooltip" data-placement="top" title="IPTV智能机顶盒故障数据快速抓取原理和实现方法">
-                        Next<br>
-                        <span>IPTV智能机顶盒故障数据快速抓取原理和实现方法</span>
-                        </a>
-                    </li>
                     
                 </ul>
 
